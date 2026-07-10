@@ -1,8 +1,8 @@
 # OptiBlue
 
-Sitio web + panel administrativo para una óptica ficticia con presencia en tres ciudades de Venezuela (Caracas, Valencia, Maracaibo). Catálogo de monturas, cotizador de lentes graduados, agendamiento de citas y contacto por WhatsApp.
+Sitio web + panel administrativo para OptiBlue, óptica real actualmente en preparación para su lanzamiento, con presencia en tres ciudades de Venezuela (Caracas, Valencia, Maracaibo). Catálogo de monturas, cotizador de lentes graduados, agendamiento de citas y contacto por WhatsApp.
 
-> ⚠️ **Estado: prototipo / mock.** No hay backend, base de datos ni autenticación real. Todo el estado (productos, citas, cotizaciones) vive en memoria del navegador (`useState`) y se pierde al recargar la página. Ver [Limitaciones conocidas](#limitaciones-conocidas-mock).
+> ⚠️ **Estado: prototipo de UI en desarrollo.** Las sedes (direcciones, teléfonos, WhatsApp) son reales. El catálogo de productos y precios es solo un ejemplo ilustrativo, aún no es el catálogo final. No hay backend, base de datos ni autenticación real todavía: todo el estado (productos, citas, cotizaciones) vive en memoria del navegador (`useState`) y se pierde al recargar la página. Ver [Limitaciones conocidas](#limitaciones-conocidas-mock).
 
 ## Stack
 
@@ -63,7 +63,7 @@ Cada componente de `components/` trae su propio `*.styles.ts` co-ubicado; los es
 - **Catálogo**: filtro por categoría (monturas, lentes de sol, deporte), reserva por WhatsApp.
 - **Lentes adaptados**: wizard de 3 pasos (montura + graduación → extras → sede y cotización), envía resumen por WhatsApp.
 - **Servicios**: listado de servicios oftalmológicos, agenda por WhatsApp.
-- **Sedes**: las 3 sedes con dirección, teléfono, horario y WhatsApp propio por sede.
+- **Sedes**: las 3 sedes reales con dirección, teléfono, horario y WhatsApp propio por sede.
 - **Panel admin** (botón "⚙ Panel", sin login): dashboard con métricas, CRUD de productos, gestión de estado de citas y cotizaciones.
 
 ## Limitaciones conocidas (mock)
@@ -72,7 +72,8 @@ Esto sigue siendo un prototipo de UI/UX, no un producto en producción:
 
 - **Sin persistencia**: los datos iniciales están en `src/data/*.ts`; cualquier cambio hecho desde el panel admin (crear/editar/eliminar producto, cambiar estado de cita, etc.) se pierde al recargar. No hay backend ni base de datos.
 - **Sin autenticación**: el "Panel de administración" es accesible para cualquier visitante del sitio, sin login ni control de acceso.
-- **Datos de contacto ficticios**: números de teléfono/WhatsApp, direcciones y el link de "Ver mapa" (`https://maps.google.com` genérico) son de ejemplo, no ubicaciones ni números reales.
+- **Catálogo de ejemplo**: los 8 productos y precios en `src/data/productos.ts` son solo ilustrativos para maquetar la UI — no son el catálogo ni los precios reales que se van a vender.
+- **Link de mapa genérico**: aunque direcciones y teléfonos de las 3 sedes son reales, el botón "Ver mapa" apunta al mismo `https://maps.google.com` genérico en las 3 — falta el link real de Google Maps por sede.
 - **Sin validación de formularios**: los inputs numéricos del admin (precio, stock) no validan formato ni rangos.
 - **Sin router**: la navegación entre páginas es estado de React (`useState`), no hay URLs por página ni soporta atrás/adelante del navegador.
 
