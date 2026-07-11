@@ -3,6 +3,7 @@ import type { Producto } from "../../types";
 import { useSedes } from "../../hooks/useSedes";
 import { pedidosApi } from "../../lib/api/pedidos";
 import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
+import { GoogleAuthGate } from "../shared/GoogleAuthGate";
 import { overlay, modal, modalTitle, formGroupFull, label, input, select, btnWA, btnGhost } from "../../styles/shared";
 import { colors } from "../../styles/tokens";
 
@@ -69,28 +70,30 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
         )}
         <div style={{ fontSize: 18, fontWeight: 800, color: colors.blue700, textAlign: "center", marginBottom: 20 }}>${producto.precio}</div>
         {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-        <div style={formGroupFull}>
-          <label style={label}>Tu nombre</label>
-          <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
-        </div>
-        <div style={formGroupFull}>
-          <label style={label}>Tu teléfono</label>
-          <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
-        </div>
-        <div style={formGroupFull}>
-          <label style={label}>Elige tu sede</label>
-          <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
-            {sedes.map((s) => (
-              <option key={s.id} value={s.ciudad}>
-                {s.ciudad} — {s.direccion.slice(0, 35)}…
-              </option>
-            ))}
-          </select>
-        </div>
-        <p style={{ fontSize: 13, color: colors.slate500, marginBottom: 20 }}>Al continuar te redirigiremos a WhatsApp para coordinar tu reserva con la sede seleccionada.</p>
-        <button style={btnWA} onClick={confirmar} disabled={enviando}>
-          {enviando ? "Enviando…" : "💬 Continuar por WhatsApp"}
-        </button>
+        <GoogleAuthGate>
+          <div style={formGroupFull}>
+            <label style={label}>Tu nombre</label>
+            <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
+          </div>
+          <div style={formGroupFull}>
+            <label style={label}>Tu teléfono</label>
+            <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
+          </div>
+          <div style={formGroupFull}>
+            <label style={label}>Elige tu sede</label>
+            <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
+              {sedes.map((s) => (
+                <option key={s.id} value={s.ciudad}>
+                  {s.ciudad} — {s.direccion.slice(0, 35)}…
+                </option>
+              ))}
+            </select>
+          </div>
+          <p style={{ fontSize: 13, color: colors.slate500, marginBottom: 20 }}>Al continuar te redirigiremos a WhatsApp para coordinar tu reserva con la sede seleccionada.</p>
+          <button style={btnWA} onClick={confirmar} disabled={enviando}>
+            {enviando ? "Enviando…" : "💬 Continuar por WhatsApp"}
+          </button>
+        </GoogleAuthGate>
         <button style={{ ...btnGhost, marginTop: 10 }} onClick={onClose} disabled={enviando}>
           Cancelar
         </button>

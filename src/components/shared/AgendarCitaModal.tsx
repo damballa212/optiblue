@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSedes } from "../../hooks/useSedes";
 import { citasApi } from "../../lib/api/citas";
+import { GoogleAuthGate } from "./GoogleAuthGate";
 import { overlay, modal, modalTitle, formGroupFull, label, input, select, btnWA, btnGhost } from "../../styles/shared";
 
 export interface CitaAgendada {
@@ -62,35 +63,37 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
       <div style={modal} onClick={(e) => e.stopPropagation()}>
         <div style={modalTitle}>📅 Agendar cita — {motivo}</div>
         {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-        <div style={formGroupFull}>
-          <label style={label}>Tu nombre</label>
-          <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
-        </div>
-        <div style={formGroupFull}>
-          <label style={label}>Tu teléfono</label>
-          <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
-        </div>
-        <div style={formGroupFull}>
-          <label style={label}>Fecha</label>
-          <input style={input} type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        </div>
-        <div style={formGroupFull}>
-          <label style={label}>Hora</label>
-          <input style={input} type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
-        </div>
-        <div style={formGroupFull}>
-          <label style={label}>Sede</label>
-          <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
-            {sedes.map((s) => (
-              <option key={s.id} value={s.ciudad}>
-                {s.ciudad}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button style={btnWA} onClick={confirmar} disabled={enviando}>
-          {enviando ? "Agendando…" : "💬 Confirmar por WhatsApp"}
-        </button>
+        <GoogleAuthGate>
+          <div style={formGroupFull}>
+            <label style={label}>Tu nombre</label>
+            <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
+          </div>
+          <div style={formGroupFull}>
+            <label style={label}>Tu teléfono</label>
+            <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
+          </div>
+          <div style={formGroupFull}>
+            <label style={label}>Fecha</label>
+            <input style={input} type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          </div>
+          <div style={formGroupFull}>
+            <label style={label}>Hora</label>
+            <input style={input} type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
+          </div>
+          <div style={formGroupFull}>
+            <label style={label}>Sede</label>
+            <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
+              {sedes.map((s) => (
+                <option key={s.id} value={s.ciudad}>
+                  {s.ciudad}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button style={btnWA} onClick={confirmar} disabled={enviando}>
+            {enviando ? "Agendando…" : "💬 Confirmar por WhatsApp"}
+          </button>
+        </GoogleAuthGate>
         <button style={{ ...btnGhost, marginTop: 10 }} onClick={onClose} disabled={enviando}>
           Cancelar
         </button>

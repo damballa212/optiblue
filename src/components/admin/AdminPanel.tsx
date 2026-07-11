@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../lib/firebase";
 import * as S from "./Admin.styles";
 import { AdminDash } from "./AdminDash";
 import { AdminProductos } from "./AdminProductos";
@@ -9,10 +12,6 @@ import { AdminSedes } from "./AdminSedes";
 
 type Seccion = "dashboard" | "productos" | "pedidos" | "citas" | "cotizaciones" | "sedes";
 
-interface AdminPanelProps {
-  onExit: () => void;
-}
-
 const SECTIONS: { key: Seccion; icon: string; label: string }[] = [
   { key: "dashboard", icon: "📊", label: "Dashboard" },
   { key: "productos", icon: "👓", label: "Productos" },
@@ -22,8 +21,14 @@ const SECTIONS: { key: Seccion; icon: string; label: string }[] = [
   { key: "sedes", icon: "📍", label: "Sedes" },
 ];
 
-export function AdminPanel({ onExit }: AdminPanelProps) {
+export function AdminPanel() {
   const [seccion, setSeccion] = useState<Seccion>("dashboard");
+  const navigate = useNavigate();
+
+  async function cerrarSesion() {
+    await signOut(auth);
+    navigate("/admin/login");
+  }
 
   return (
     <div style={S.adminLayout}>
@@ -39,8 +44,11 @@ export function AdminPanel({ onExit }: AdminPanelProps) {
           </div>
         ))}
         <div style={S.sidebarExitWrap}>
-          <button onClick={onExit} style={S.sidebarExit}>
+          <button onClick={() => navigate("/")} style={S.sidebarExit}>
             ← Ver sitio
+          </button>
+          <button onClick={cerrarSesion} style={{ ...S.sidebarExit, marginTop: 8 }}>
+            Cerrar sesión
           </button>
         </div>
       </div>

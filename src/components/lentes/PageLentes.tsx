@@ -6,6 +6,7 @@ import { useSedes } from "../../hooks/useSedes";
 import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { cotizacionesApi } from "../../lib/api/cotizaciones";
 import { AgendarCitaModal } from "../shared/AgendarCitaModal";
+import { GoogleAuthGate } from "../shared/GoogleAuthGate";
 import { section, sectionTag, sectionH2, sectionSub, grid, formGroupFull, label, input, select, btnPrimary, btnGhost, btnWA } from "../../styles/shared";
 import * as S from "./PageLentes.styles";
 
@@ -274,27 +275,29 @@ export function PageLentes() {
             <div style={S.cotizNum}>${total}</div>
           </div>
           {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-          <div style={formGroupFull}>
-            <label style={label}>Tu nombre</label>
-            <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
-          </div>
-          <div style={formGroupFull}>
-            <label style={label}>Tu teléfono</label>
-            <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
-          </div>
-          <div style={formGroupFull}>
-            <label style={label}>Sede de entrega</label>
-            <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
-              {sedes.map((s) => (
-                <option key={s.id} value={s.ciudad}>
-                  {s.ciudad}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button style={btnWA} onClick={enviarWA} disabled={enviando}>
-            {enviando ? "Enviando…" : "💬 Enviar cotización por WhatsApp"}
-          </button>
+          <GoogleAuthGate>
+            <div style={formGroupFull}>
+              <label style={label}>Tu nombre</label>
+              <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
+            </div>
+            <div style={formGroupFull}>
+              <label style={label}>Tu teléfono</label>
+              <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
+            </div>
+            <div style={formGroupFull}>
+              <label style={label}>Sede de entrega</label>
+              <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
+                {sedes.map((s) => (
+                  <option key={s.id} value={s.ciudad}>
+                    {s.ciudad}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button style={btnWA} onClick={enviarWA} disabled={enviando}>
+              {enviando ? "Enviando…" : "💬 Enviar cotización por WhatsApp"}
+            </button>
+          </GoogleAuthGate>
           <button style={{ ...btnGhost, marginTop: 10 }} onClick={() => setMostrarAgendarCita(true)} disabled={enviando}>
             📅 Agendar examen visual primero
           </button>

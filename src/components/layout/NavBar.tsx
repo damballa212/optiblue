@@ -1,22 +1,23 @@
+import { Link, useLocation } from "react-router-dom";
 import * as S from "./NavBar.styles";
 
 export type PageKey = "home" | "productos" | "lentes" | "servicios" | "sedes";
 
 interface NavBarProps {
-  page: PageKey;
   setPage: (page: PageKey) => void;
-  onAdmin: () => void;
 }
 
-const LINKS: { key: PageKey; label: string }[] = [
-  { key: "home", label: "Inicio" },
-  { key: "productos", label: "Catálogo" },
-  { key: "lentes", label: "Lentes adaptados" },
-  { key: "servicios", label: "Oftalmología" },
-  { key: "sedes", label: "Sedes" },
+const LINKS: { key: PageKey; label: string; path: string }[] = [
+  { key: "home", label: "Inicio", path: "/" },
+  { key: "productos", label: "Catálogo", path: "/catalogo" },
+  { key: "lentes", label: "Lentes adaptados", path: "/lentes" },
+  { key: "servicios", label: "Oftalmología", path: "/servicios" },
+  { key: "sedes", label: "Sedes", path: "/sedes" },
 ];
 
-export function NavBar({ page, setPage, onAdmin }: NavBarProps) {
+export function NavBar({ setPage }: NavBarProps) {
+  const location = useLocation();
+
   return (
     <nav style={S.nav}>
       <div style={S.navLogo} onClick={() => setPage("home")}>
@@ -27,13 +28,13 @@ export function NavBar({ page, setPage, onAdmin }: NavBarProps) {
       </div>
       <div style={S.navLinks}>
         {LINKS.map((l) => (
-          <button key={l.key} style={S.navLink(page === l.key)} onClick={() => setPage(l.key)}>
+          <button key={l.key} style={S.navLink(location.pathname === l.path)} onClick={() => setPage(l.key)}>
             {l.label}
           </button>
         ))}
-        <button style={S.adminBtn} onClick={onAdmin}>
+        <Link to="/admin" style={S.adminBtn}>
           ⚙ Panel
-        </button>
+        </Link>
       </div>
     </nav>
   );
