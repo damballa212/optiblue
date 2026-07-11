@@ -1,5 +1,5 @@
 export type { Sede } from "./sede";
-export type { CategoriaProducto, CategoriaFiltro, Categoria } from "./categoria";
+export type { CategoriaFiltro, Categoria } from "./categoria";
 export type { Producto } from "./producto";
 export type { Cita, EstadoCita } from "./cita";
 export type { Cotizacion, EstadoCotizacion } from "./cotizacion";

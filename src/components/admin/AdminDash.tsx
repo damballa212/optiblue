@@ -1,16 +1,17 @@
-import type { Producto, Cita, Cotizacion } from "../../types";
+import type { Cita, Cotizacion } from "../../types";
+import { useProductos } from "../../hooks/useProductos";
 import { statGrid, statCard, statNum, statLabel, card, badge } from "../../styles/shared";
 import * as S from "./AdminDash.styles";
 
 interface AdminDashProps {
-  products: Producto[];
   citas: Cita[];
   cotizaciones: Cotizacion[];
 }
 
-export function AdminDash({ products, citas, cotizaciones }: AdminDashProps) {
+export function AdminDash({ citas, cotizaciones }: AdminDashProps) {
+  const { productos } = useProductos();
   const stats = [
-    { num: products.length, label: "Productos activos" },
+    { num: productos.length, label: "Productos activos" },
     { num: citas.length, label: "Citas registradas" },
     { num: cotizaciones.length, label: "Cotizaciones" },
     { num: citas.filter((c) => c.estado === "pendiente").length, label: "Citas pendientes" },

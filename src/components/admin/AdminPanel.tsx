@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Producto, Cita, Cotizacion } from "../../types";
+import type { Cita, Cotizacion } from "../../types";
 import * as S from "./Admin.styles";
 import { AdminDash } from "./AdminDash";
 import { AdminProductos } from "./AdminProductos";
@@ -10,8 +10,6 @@ import { AdminSedes } from "./AdminSedes";
 type Seccion = "dashboard" | "productos" | "citas" | "cotizaciones" | "sedes";
 
 interface AdminPanelProps {
-  products: Producto[];
-  setProducts: React.Dispatch<React.SetStateAction<Producto[]>>;
   citas: Cita[];
   setCitas: React.Dispatch<React.SetStateAction<Cita[]>>;
   cotizaciones: Cotizacion[];
@@ -27,7 +25,7 @@ const SECTIONS: { key: Seccion; icon: string; label: string }[] = [
   { key: "sedes", icon: "📍", label: "Sedes" },
 ];
 
-export function AdminPanel({ products, setProducts, citas, setCitas, cotizaciones, setCotizaciones, onExit }: AdminPanelProps) {
+export function AdminPanel({ citas, setCitas, cotizaciones, setCotizaciones, onExit }: AdminPanelProps) {
   const [seccion, setSeccion] = useState<Seccion>("dashboard");
 
   return (
@@ -58,8 +56,8 @@ export function AdminPanel({ products, setProducts, citas, setCitas, cotizacione
           </div>
         </div>
         <div style={S.adminContent}>
-          {seccion === "dashboard" && <AdminDash products={products} citas={citas} cotizaciones={cotizaciones} />}
-          {seccion === "productos" && <AdminProductos products={products} setProducts={setProducts} />}
+          {seccion === "dashboard" && <AdminDash citas={citas} cotizaciones={cotizaciones} />}
+          {seccion === "productos" && <AdminProductos />}
           {seccion === "citas" && <AdminCitas citas={citas} setCitas={setCitas} />}
           {seccion === "cotizaciones" && <AdminCotizaciones cotizaciones={cotizaciones} setCotizaciones={setCotizaciones} />}
           {seccion === "sedes" && <AdminSedes />}

@@ -23,7 +23,11 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
     <div style={overlay} onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
         <div style={modalTitle}>📅 Reservar — {producto.nombre}</div>
-        <div style={{ fontSize: 22, textAlign: "center", padding: "16px 0" }}>{producto.imagen}</div>
+        {producto.imagenUrl ? (
+          <img src={producto.imagenUrl} alt={producto.nombre} style={{ width: "100%", height: 120, objectFit: "cover", borderRadius: 8, marginBottom: 8 }} />
+        ) : (
+          <div style={{ fontSize: 22, textAlign: "center", padding: "16px 0" }}>👓</div>
+        )}
         <div style={{ fontSize: 18, fontWeight: 800, color: colors.blue700, textAlign: "center", marginBottom: 20 }}>${producto.precio}</div>
         <div style={formGroupFull}>
           <label style={label}>Elige tu sede</label>

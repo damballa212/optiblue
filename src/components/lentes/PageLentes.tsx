@@ -1,13 +1,10 @@
-import { useState } from "react";
-import type { Producto } from "../../types";
+import { useState, useEffect } from "react";
 import { SEDES, EXTRAS_LENTES } from "../../data";
+import { useProductos } from "../../hooks/useProductos";
+import { useCategorias } from "../../hooks/useCategorias";
 import { buildWAMessage, openWA } from "../../lib/whatsapp";
 import { section, sectionTag, sectionH2, sectionSub, grid, formGroupFull, label, select, btnPrimary, btnGhost, btnWA } from "../../styles/shared";
 import * as S from "./PageLentes.styles";
-
-interface PageLentesProps {
-  products: Producto[];
-}
 
 const GRAD_STEPS = ["", "0.25", "0.50", "0.75", "1.00", "1.25", "1.50", "1.75", "2.00", "2.25", "2.50", "2.75", "3.00", "3.50", "4.00", "4.50", "5.00", "5.50", "6.00"];
 
@@ -15,9 +12,18 @@ const STEP_LABELS = ["1. Montura y graduación", "2. Extras", "3. Sede y cotizac
 
 const LENTE_BASE = 10;
 
-export function PageLentes({ products }: PageLentesProps) {
-  const monturas = products.filter((p) => p.categoria === "monturas");
-  const [montura, setMontura] = useState<string>(String(monturas[0]?.id ?? ""));
+export function PageLentes() {
+  const { productos } = useProductos();
+  const { categorias } = useCategorias();
+  const monturasCategoriaId = categorias.find((c) => c.key === "monturas")?.id;
+  const monturas = productos.filter((p) => p.categoriaId === monturasCategoriaId);
+  const [montura, setMontura] = useState<string>("");
+
+  // La lista de monturas llega asíncrono (Firestore); una vez disponible,
+  // preseleccionamos la primera si el usuario todavía no eligió ninguna.
+  useEffect(() => {
+    if (!montura && monturas.length > 0) setMontura(monturas[0].id);
+  }, [montura, monturas]);
   const [od, setOd] = useState("");
   const [oi, setOi] = useState("");
   const [astOD, setAstOD] = useState("");
@@ -26,7 +32,7 @@ export function PageLentes({ products }: PageLentesProps) {
   const [sede, setSede] = useState(SEDES[0].ciudad);
   const [step, setStep] = useState(1);
 
-  const monObj = monturas.find((m) => m.id === Number(montura));
+  const monObj = monturas.find((m) => m.id === montura);
   const extrasTotal = extras.reduce((sum, k) => sum + (EXTRAS_LENTES.find((e) => e.key === k)?.precio ?? 0), 0);
   const total = (monObj?.precio ?? 0) + extrasTotal + LENTE_BASE;
 

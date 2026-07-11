@@ -1,63 +1,92 @@
 import { useState } from "react";
-import type { Producto, CategoriaProducto } from "../../types";
+import type { Producto } from "../../types";
+import { useProductos } from "../../hooks/useProductos";
+import { useCategorias } from "../../hooks/useCategorias";
+import { catalogoApi } from "../../lib/api/catalogo";
 import { btnPrimary, btnGhost, overlay, modal, modalTitle, formGroupFull, label, input, select, table, th, td, badge } from "../../styles/shared";
 import * as Admin from "./Admin.styles";
 import * as S from "./AdminProductos.styles";
 
-interface AdminProductosProps {
-  products: Producto[];
-  setProducts: React.Dispatch<React.SetStateAction<Producto[]>>;
-}
-
 interface ProductoForm {
   nombre: string;
-  categoria: CategoriaProducto;
+  categoriaId: string;
   precio: string;
-  imagen: string;
+  imagenUrl: string;
   descripcion: string;
   stock: string;
   destacado: boolean;
 }
 
-const EMPTY_FORM: ProductoForm = { nombre: "", categoria: "monturas", precio: "", imagen: "👓", descripcion: "", stock: "0", destacado: false };
+const EMPTY_FORM: ProductoForm = { nombre: "", categoriaId: "", precio: "", imagenUrl: "", descripcion: "", stock: "0", destacado: false };
 
 const TEXT_FIELDS: [keyof ProductoForm, string][] = [
   ["nombre", "Nombre"],
   ["descripcion", "Descripción"],
-  ["imagen", "Emoji / ícono"],
+  ["imagenUrl", "URL de imagen"],
   ["precio", "Precio ($)"],
   ["stock", "Stock"],
 ];
 
-export function AdminProductos({ products, setProducts }: AdminProductosProps) {
-  const [editando, setEditando] = useState<number | "new" | null>(null);
+// Las escrituras van a Firestore vía catalogoApi (Cloud Function); la lista
+// se actualiza sola por el onSnapshot de useProductos, sin tocar estado local.
+export function AdminProductos() {
+  const { productos } = useProductos();
+  const { categorias } = useCategorias();
+  const [editando, setEditando] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<ProductoForm>(EMPTY_FORM);
   const [nuevo, setNuevo] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const categoriaLabel = (categoriaId: string) => categorias.find((c) => c.id === categoriaId)?.label ?? "—";
 
   function abrirEditar(p: Producto) {
-    setForm({ nombre: p.nombre, categoria: p.categoria, precio: String(p.precio), imagen: p.imagen, descripcion: p.descripcion, stock: String(p.stock), destacado: p.destacado });
+    setForm({ nombre: p.nombre, categoriaId: p.categoriaId, precio: String(p.precio), imagenUrl: p.imagenUrl ?? "", descripcion: p.descripcion, stock: String(p.stock), destacado: p.destacado });
     setEditando(p.id);
     setNuevo(false);
+    setError(null);
   }
 
   function abrirNuevo() {
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, categoriaId: categorias[0]?.id ?? "" });
     setEditando("new");
     setNuevo(true);
+    setError(null);
   }
 
-  function guardar() {
-    if (nuevo) {
-      const producto: Producto = { id: Date.now(), nombre: form.nombre, categoria: form.categoria, precio: Number(form.precio), imagen: form.imagen, descripcion: form.descripcion, stock: Number(form.stock), destacado: form.destacado };
-      setProducts((prev) => [...prev, producto]);
-    } else {
-      setProducts((prev) => prev.map((p) => (p.id === editando ? { ...p, nombre: form.nombre, categoria: form.categoria, precio: Number(form.precio), imagen: form.imagen, descripcion: form.descripcion, stock: Number(form.stock), destacado: form.destacado } : p)));
+  async function guardar() {
+    setGuardando(true);
+    setError(null);
+    const input = {
+      nombre: form.nombre,
+      categoriaId: form.categoriaId,
+      precio: Number(form.precio),
+      imagenUrl: form.imagenUrl.trim() ? form.imagenUrl.trim() : null,
+      descripcion: form.descripcion,
+      stock: Number(form.stock),
+      destacado: form.destacado,
+    };
+    try {
+      if (nuevo) {
+        await catalogoApi.crearProducto(input);
+      } else if (typeof editando === "string") {
+        await catalogoApi.actualizarProducto(editando, input);
+      }
+      setEditando(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo guardar el producto");
+    } finally {
+      setGuardando(false);
     }
-    setEditando(null);
   }
 
-  function eliminar(id: number) {
-    if (window.confirm("¿Eliminar producto?")) setProducts((prev) => prev.filter((p) => p.id !== id));
+  async function eliminar(id: string) {
+    if (!window.confirm("¿Eliminar producto?")) return;
+    try {
+      await catalogoApi.eliminarProducto(id);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo eliminar el producto");
+    }
   }
 
   return (
@@ -79,14 +108,14 @@ export function AdminProductos({ products, setProducts }: AdminProductosProps) {
           </tr>
         </thead>
         <tbody>
-          {products.map((p) => (
+          {productos.map((p) => (
             <tr key={p.id}>
               <td style={td}>
-                <span style={S.productCell}>{p.imagen}</span>
+                {p.imagenUrl ? <img src={p.imagenUrl} alt={p.nombre} style={S.thumbImg} /> : <span style={S.productCell}>👓</span>}
                 {p.nombre}
               </td>
               <td style={td}>
-                <span style={badge("azul")}>{p.categoria}</span>
+                <span style={badge("azul")}>{categoriaLabel(p.categoriaId)}</span>
               </td>
               <td style={td}>
                 <b>${p.precio}</b>
@@ -107,9 +136,10 @@ export function AdminProductos({ products, setProducts }: AdminProductosProps) {
       </table>
 
       {editando !== null && (
-        <div style={overlay} onClick={() => setEditando(null)}>
+        <div style={overlay} onClick={() => !guardando && setEditando(null)}>
           <div style={modal} onClick={(e) => e.stopPropagation()}>
             <div style={modalTitle}>{nuevo ? "Nuevo producto" : "Editar producto"}</div>
+            {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
             {TEXT_FIELDS.map(([k, l]) => (
               <div key={k} style={formGroupFull}>
                 <label style={label}>{l}</label>
@@ -118,20 +148,22 @@ export function AdminProductos({ products, setProducts }: AdminProductosProps) {
             ))}
             <div style={formGroupFull}>
               <label style={label}>Categoría</label>
-              <select style={select} value={form.categoria} onChange={(e) => setForm((f) => ({ ...f, categoria: e.target.value as CategoriaProducto }))}>
-                <option value="monturas">Monturas</option>
-                <option value="solares">Lentes de sol</option>
-                <option value="deporte">Deporte</option>
+              <select style={select} value={form.categoriaId} onChange={(e) => setForm((f) => ({ ...f, categoriaId: e.target.value }))}>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div style={S.checkboxRow}>
               <input type="checkbox" checked={form.destacado} onChange={(e) => setForm((f) => ({ ...f, destacado: e.target.checked }))} />
               <label style={label}>Producto destacado (aparece en el inicio)</label>
             </div>
-            <button style={btnPrimary} onClick={guardar}>
-              Guardar
+            <button style={btnPrimary} onClick={guardar} disabled={guardando}>
+              {guardando ? "Guardando…" : "Guardar"}
             </button>
-            <button style={{ ...btnGhost, marginTop: 8 }} onClick={() => setEditando(null)}>
+            <button style={{ ...btnGhost, marginTop: 8 }} onClick={() => setEditando(null)} disabled={guardando}>
               Cancelar
             </button>
           </div>

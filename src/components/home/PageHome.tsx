@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { Producto } from "../../types";
-import { INITIAL_PRODUCTS, SERVICIOS } from "../../data";
+import { SERVICIOS } from "../../data";
+import { useProductos } from "../../hooks/useProductos";
+import { useCategorias } from "../../hooks/useCategorias";
 import type { PageKey } from "../layout/NavBar";
 import { section, sectionTag, sectionH2, sectionSub, grid, btnPrimary, btnGhost } from "../../styles/shared";
 import * as S from "./PageHome.styles";
@@ -15,7 +17,10 @@ interface PageHomeProps {
 
 export function PageHome({ setPage }: PageHomeProps) {
   const [modal, setModal] = useState<Producto | null>(null);
-  const destacados = INITIAL_PRODUCTS.filter((p) => p.destacado);
+  const { productos } = useProductos();
+  const { categorias } = useCategorias();
+  const destacados = productos.filter((p) => p.destacado);
+  const categoriaLabel = (categoriaId: string) => categorias.find((c) => c.id === categoriaId)?.label ?? "Producto";
 
   return (
     <>
@@ -27,7 +32,7 @@ export function PageHome({ setPage }: PageHomeProps) {
           <p style={sectionSub}>Nuestra selección de temporada.</p>
           <div style={grid(220)}>
             {destacados.map((p) => (
-              <ProductCard key={p.id} p={p} onReservar={setModal} />
+              <ProductCard key={p.id} p={p} categoriaLabel={categoriaLabel(p.categoriaId)} onReservar={setModal} />
             ))}
           </div>
           <div style={S.ctaCenter}>

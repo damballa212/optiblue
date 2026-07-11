@@ -1,11 +1,9 @@
-import type { CategoriaProducto } from "./categoria";
-
 export interface Producto {
-  id: number;
+  id: string;
   nombre: string;
-  categoria: CategoriaProducto;
+  categoriaId: string;
   precio: number;
-  imagen: string;
+  imagenUrl: string | null;
   descripcion: string;
   stock: number;
   destacado: boolean;
