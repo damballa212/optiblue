@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { SEDES, EXTRAS_LENTES } from "../../data";
+import { EXTRAS_LENTES } from "../../data";
 import { useProductos } from "../../hooks/useProductos";
 import { useCategorias } from "../../hooks/useCategorias";
-import { buildWAMessage, openWA } from "../../lib/whatsapp";
+import { useSedes } from "../../hooks/useSedes";
+import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { section, sectionTag, sectionH2, sectionSub, grid, formGroupFull, label, select, btnPrimary, btnGhost, btnWA } from "../../styles/shared";
 import * as S from "./PageLentes.styles";
 
@@ -29,8 +30,13 @@ export function PageLentes() {
   const [astOD, setAstOD] = useState("");
   const [astOI, setAstOI] = useState("");
   const [extras, setExtras] = useState<string[]>([]);
-  const [sede, setSede] = useState(SEDES[0].ciudad);
+  const { sedes } = useSedes();
+  const [sede, setSede] = useState("");
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (!sede && sedes.length > 0) setSede(sedes[0].ciudad);
+  }, [sede, sedes]);
 
   const monObj = monturas.find((m) => m.id === montura);
   const extrasTotal = extras.reduce((sum, k) => sum + (EXTRAS_LENTES.find((e) => e.key === k)?.precio ?? 0), 0);
@@ -43,12 +49,12 @@ export function PageLentes() {
   function enviarWA() {
     const extrasLabels = extras.map((k) => EXTRAS_LENTES.find((e) => e.key === k)?.label ?? k);
     const msg = buildWAMessage({ tipo: "cotizacion", montura: monObj?.nombre, od, oi, astOD, astOI, extras: extrasLabels, total, sede });
-    openWA(msg, sede);
+    openWA(msg, getSedeWhatsapp(sedes, sede));
   }
 
   function citaWA() {
     const msg = buildWAMessage({ tipo: "cita", sede, montura: monObj?.nombre });
-    openWA(msg, sede);
+    openWA(msg, getSedeWhatsapp(sedes, sede));
   }
 
   return (
@@ -229,7 +235,7 @@ export function PageLentes() {
           <div style={formGroupFull}>
             <label style={label}>Sede de entrega</label>
             <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
-              {SEDES.map((s) => (
+              {sedes.map((s) => (
                 <option key={s.id} value={s.ciudad}>
                   {s.ciudad}
                 </option>

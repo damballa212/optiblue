@@ -1,5 +1,6 @@
 import type { Cita, EstadoCita } from "../../types";
-import { openWA } from "../../lib/whatsapp";
+import { useSedes } from "../../hooks/useSedes";
+import { openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { table, th, td } from "../../styles/shared";
 import { colors } from "../../styles/tokens";
 import * as Admin from "./Admin.styles";
@@ -12,6 +13,8 @@ interface AdminCitasProps {
 const ESTADOS: EstadoCita[] = ["pendiente", "confirmada", "completada", "cancelada"];
 
 export function AdminCitas({ citas, setCitas }: AdminCitasProps) {
+  const { sedes } = useSedes();
+
   function cambiarEstado(id: number, estado: EstadoCita) {
     setCitas((prev) => prev.map((c) => (c.id === id ? { ...c, estado } : c)));
   }
@@ -21,7 +24,7 @@ export function AdminCitas({ citas, setCitas }: AdminCitasProps) {
   }
 
   function confirmarPorWA(c: Cita) {
-    openWA(encodeURIComponent(`Hola ${c.nombre}! Te confirmamos tu cita en OptiBlue ${c.sede} el ${c.fecha} a las ${c.hora}.`), c.sede);
+    openWA(encodeURIComponent(`Hola ${c.nombre}! Te confirmamos tu cita en OptiBlue ${c.sede} el ${c.fecha} a las ${c.hora}.`), getSedeWhatsapp(sedes, c.sede));
   }
 
   return (

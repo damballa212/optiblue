@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Producto } from "../../types";
-import { SEDES } from "../../data";
-import { buildWAMessage, openWA } from "../../lib/whatsapp";
+import { useSedes } from "../../hooks/useSedes";
+import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { overlay, modal, modalTitle, formGroupFull, label, select, btnWA, btnGhost } from "../../styles/shared";
 import { colors } from "../../styles/tokens";
 
@@ -11,11 +11,16 @@ interface ReservaModalProps {
 }
 
 export function ReservaModal({ producto, onClose }: ReservaModalProps) {
-  const [sede, setSede] = useState(SEDES[0].ciudad);
+  const { sedes } = useSedes();
+  const [sede, setSede] = useState("");
+
+  useEffect(() => {
+    if (!sede && sedes.length > 0) setSede(sedes[0].ciudad);
+  }, [sede, sedes]);
 
   function confirmar() {
     const msg = buildWAMessage({ tipo: "reserva", nombre: producto.nombre, precio: producto.precio, sede });
-    openWA(msg, sede);
+    openWA(msg, getSedeWhatsapp(sedes, sede));
     onClose();
   }
 
@@ -32,7 +37,7 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
         <div style={formGroupFull}>
           <label style={label}>Elige tu sede</label>
           <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
-            {SEDES.map((s) => (
+            {sedes.map((s) => (
               <option key={s.id} value={s.ciudad}>
                 {s.ciudad} — {s.direccion.slice(0, 35)}…
               </option>

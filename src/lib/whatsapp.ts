@@ -1,6 +1,4 @@
-import { SEDES } from "../data/sedes";
-
-const DEFAULT_WHATSAPP = SEDES[0].whatsapp;
+import type { Sede } from "../types";
 
 export type WAMessagePayload =
   | { tipo: "reserva"; nombre: string; precio: number; sede?: string }
@@ -35,17 +33,16 @@ export function buildWAMessage(payload: WAMessagePayload): string {
 }
 
 /**
- * Resolves the WhatsApp number for a given sede name.
- * Each sede owns its own number (SEDES[].whatsapp) instead of a single
- * hardcoded number for the whole app, so messages route to the right branch.
+ * Resuelve el número de WhatsApp de una sede por nombre de ciudad.
+ * `sedes` ya no es un mock estático — viene de Firestore (useSedes()) y se
+ * pasa explícito acá, así este helper no depende de dónde vinieron los datos.
  */
-export function getSedeWhatsapp(ciudad?: string): string {
-  if (!ciudad) return DEFAULT_WHATSAPP;
-  const sede = SEDES.find((s) => s.ciudad === ciudad);
-  return sede?.whatsapp ?? DEFAULT_WHATSAPP;
+export function getSedeWhatsapp(sedes: Sede[], ciudad?: string): string {
+  const fallback = sedes[0]?.whatsapp ?? "";
+  if (!ciudad) return fallback;
+  return sedes.find((s) => s.ciudad === ciudad)?.whatsapp ?? fallback;
 }
 
-export function openWA(msg: string, ciudad?: string): void {
-  const numero = getSedeWhatsapp(ciudad);
-  window.open(`https://wa.me/${numero}?text=${msg}`, "_blank");
+export function openWA(msg: string, whatsappNumber: string): void {
+  window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
 }

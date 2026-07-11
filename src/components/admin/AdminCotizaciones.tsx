@@ -1,5 +1,6 @@
 import type { Cotizacion, EstadoCotizacion } from "../../types";
-import { openWA } from "../../lib/whatsapp";
+import { useSedes } from "../../hooks/useSedes";
+import { openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { table, th, td } from "../../styles/shared";
 import { colors } from "../../styles/tokens";
 import * as Admin from "./Admin.styles";
@@ -12,12 +13,14 @@ interface AdminCotizacionesProps {
 const ESTADOS: EstadoCotizacion[] = ["pendiente", "contactado", "cerrada"];
 
 export function AdminCotizaciones({ cotizaciones, setCotizaciones }: AdminCotizacionesProps) {
+  const { sedes } = useSedes();
+
   function cambiarEstado(id: number, estado: EstadoCotizacion) {
     setCotizaciones((prev) => prev.map((c) => (c.id === id ? { ...c, estado } : c)));
   }
 
   function contactarPorWA(c: Cotizacion) {
-    openWA(encodeURIComponent(`Hola ${c.nombre}! Te contactamos de OptiBlue por tu cotización de ${c.montura} por $${c.total}.`), c.sede);
+    openWA(encodeURIComponent(`Hola ${c.nombre}! Te contactamos de OptiBlue por tu cotización de ${c.montura} por $${c.total}.`), getSedeWhatsapp(sedes, c.sede));
   }
 
   return (

@@ -1,15 +1,18 @@
 import type { Servicio } from "../../types";
 import { SERVICIOS } from "../../data";
-import { openWA } from "../../lib/whatsapp";
+import { useSedes } from "../../hooks/useSedes";
+import { openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { section, sectionTag, sectionH2, sectionSub, grid, btnPrimary } from "../../styles/shared";
 import * as S from "./PageServicios.styles";
 
-function reservarServicio(s: Servicio) {
-  const msg = encodeURIComponent(`Hola OptiBlue! Quisiera agendar: *${s.nombre}*`);
-  openWA(msg);
-}
-
 export function PageServicios() {
+  const { sedes } = useSedes();
+
+  function reservarServicio(s: Servicio) {
+    const msg = encodeURIComponent(`Hola OptiBlue! Quisiera agendar: *${s.nombre}*`);
+    openWA(msg, getSedeWhatsapp(sedes));
+  }
+
   return (
     <div style={section}>
       <div style={sectionTag}>Oftalmología</div>

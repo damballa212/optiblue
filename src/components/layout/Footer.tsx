@@ -1,4 +1,4 @@
-import { SEDES } from "../../data";
+import { useSedes } from "../../hooks/useSedes";
 import type { PageKey } from "./NavBar";
 import * as S from "./Footer.styles";
 
@@ -9,6 +9,8 @@ interface FooterProps {
 const CATALOGO_LINKS = ["Monturas", "Lentes de sol", "Deporte", "Lentes adaptados"];
 
 export function Footer({ setPage }: FooterProps) {
+  const { sedes } = useSedes();
+
   return (
     <footer style={S.footer}>
       <div style={S.inner}>
@@ -27,7 +29,7 @@ export function Footer({ setPage }: FooterProps) {
           </div>
           <div>
             <div style={S.colTitle}>Sedes</div>
-            {SEDES.map((s) => (
+            {sedes.map((s) => (
               <div key={s.id} style={S.colText}>
                 📍 {s.ciudad}
               </div>
