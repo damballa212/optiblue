@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Producto } from "../../types";
 import { useProductos } from "../../hooks/useProductos";
 import { useCategorias } from "../../hooks/useCategorias";
@@ -40,6 +40,16 @@ export function AdminProductos() {
 
   const categoriaLabel = (categoriaId: string) => categorias.find((c) => c.id === categoriaId)?.label ?? "—";
 
+  // Si el modal de "nuevo producto" se abrió antes de que categorias
+  // terminara de cargar (onSnapshot async), el <select> mostraba la primera
+  // opción visualmente sin que el estado real se actualizara — esto lo
+  // corrige apenas categorias llega.
+  useEffect(() => {
+    if (editando === "new" && !form.categoriaId && categorias.length > 0) {
+      setForm((f) => ({ ...f, categoriaId: categorias[0].id }));
+    }
+  }, [editando, form.categoriaId, categorias]);
+
   function abrirEditar(p: Producto) {
     setForm({ nombre: p.nombre, categoriaId: p.categoriaId, precio: String(p.precio), imagenUrl: p.imagenUrl ?? "", descripcion: p.descripcion, stock: String(p.stock), destacado: p.destacado });
     setEditando(p.id);
@@ -55,11 +65,20 @@ export function AdminProductos() {
   }
 
   async function guardar() {
+    // Fallback por si categorias todavía no había cargado (onSnapshot async)
+    // cuando se abrió el modal — el <select> se ve bien igual porque el
+    // navegador muestra la primera opción aunque el value real sea "".
+    const categoriaId = form.categoriaId || categorias[0]?.id || "";
+    if (!categoriaId) {
+      setError("No hay categorías cargadas todavía. Espera un segundo e intenta de nuevo.");
+      return;
+    }
+
     setGuardando(true);
     setError(null);
     const input = {
       nombre: form.nombre,
-      categoriaId: form.categoriaId,
+      categoriaId,
       precio: Number(form.precio),
       imagenUrl: form.imagenUrl.trim() ? form.imagenUrl.trim() : null,
       descripcion: form.descripcion,
