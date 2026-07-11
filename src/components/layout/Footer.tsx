@@ -9,7 +9,8 @@ interface FooterProps {
 const CATALOGO_LINKS = ["Monturas", "Lentes de sol", "Deporte", "Lentes adaptados"];
 
 export function Footer({ setPage }: FooterProps) {
-  const { sedes } = useSedes();
+  const { sedes, loading, error } = useSedes();
+  const year = new Date().getFullYear();
 
   return (
     <footer style={S.footer}>
@@ -29,11 +30,16 @@ export function Footer({ setPage }: FooterProps) {
           </div>
           <div>
             <div style={S.colTitle}>Sedes</div>
-            {sedes.map((s) => (
-              <div key={s.id} style={S.colText}>
-                📍 {s.ciudad}
-              </div>
-            ))}
+            {loading && <div style={S.colText}>Cargando sedes...</div>}
+            {!loading && error && <div style={S.colText}>Sedes por confirmar</div>}
+            {!loading && !error && sedes.length === 0 && <div style={S.colText}>Sedes por confirmar</div>}
+            {!loading &&
+              !error &&
+              sedes.map((s) => (
+                <div key={s.id} style={S.colText}>
+                  📍 {s.ciudad}
+                </div>
+              ))}
           </div>
           <div>
             <div style={S.colTitle}>Contacto</div>
@@ -42,7 +48,7 @@ export function Footer({ setPage }: FooterProps) {
             <div style={S.colText}>Lun–Sáb 9am–7pm</div>
           </div>
         </div>
-        <div style={S.bottom}>© 2025 OptiBlue · Todos los derechos reservados</div>
+        <div style={S.bottom}>© {year} OptiBlue · Todos los derechos reservados</div>
       </div>
     </footer>
   );

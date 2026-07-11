@@ -9,6 +9,7 @@ import * as S from "./PageHome.styles";
 import { Hero } from "./Hero";
 import { ProductCard } from "../catalogo/ProductCard";
 import { ReservaModal } from "../catalogo/ReservaModal";
+import { StatusBlock } from "../shared/StatusBlock";
 import * as Serv from "../servicios/PageServicios.styles";
 
 interface PageHomeProps {
@@ -17,10 +18,12 @@ interface PageHomeProps {
 
 export function PageHome({ setPage }: PageHomeProps) {
   const [modal, setModal] = useState<Producto | null>(null);
-  const { productos } = useProductos();
-  const { categorias } = useCategorias();
+  const { productos, loading: productosLoading, error: productosError } = useProductos();
+  const { categorias, loading: categoriasLoading, error: categoriasError } = useCategorias();
   const destacados = productos.filter((p) => p.destacado);
   const categoriaLabel = (categoriaId: string) => categorias.find((c) => c.id === categoriaId)?.label ?? "Producto";
+  const catalogoLoading = productosLoading || categoriasLoading;
+  const catalogoError = productosError || categoriasError;
 
   return (
     <>
@@ -30,11 +33,16 @@ export function PageHome({ setPage }: PageHomeProps) {
           <div style={sectionTag}>Lo más buscado</div>
           <h2 style={sectionH2}>Productos destacados</h2>
           <p style={sectionSub}>Nuestra selección de temporada.</p>
-          <div style={grid(220)}>
-            {destacados.map((p) => (
-              <ProductCard key={p.id} p={p} categoriaLabel={categoriaLabel(p.categoriaId)} onReservar={setModal} />
-            ))}
-          </div>
+          {catalogoLoading && <StatusBlock kind="loading" title="Cargando productos" message="Estamos consultando el catálogo disponible." />}
+          {!catalogoLoading && catalogoError && <StatusBlock kind="error" title="No pudimos cargar los destacados" message="Revisa la conexión o intenta de nuevo en unos minutos." />}
+          {!catalogoLoading && !catalogoError && destacados.length === 0 && <StatusBlock kind="empty" title="Destacados pendientes" message="El catálogo está activo, pero todavía no hay productos marcados como destacados." />}
+          {!catalogoLoading && !catalogoError && destacados.length > 0 && (
+            <div style={grid(220)}>
+              {destacados.map((p) => (
+                <ProductCard key={p.id} p={p} categoriaLabel={categoriaLabel(p.categoriaId)} onReservar={setModal} />
+              ))}
+            </div>
+          )}
           <div style={S.ctaCenter}>
             <button style={{ ...btnPrimary, width: "auto", padding: "12px 28px" }} onClick={() => setPage("productos")}>
               Ver catálogo completo →
