@@ -1,27 +1,34 @@
-import type { Cotizacion, EstadoCotizacion } from "../../types";
+import type { EstadoCotizacion } from "../../types";
+import { useCotizaciones } from "../../hooks/useCotizaciones";
+import { useProductos } from "../../hooks/useProductos";
 import { useSedes } from "../../hooks/useSedes";
+import { cotizacionesApi } from "../../lib/api/cotizaciones";
 import { openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { table, th, td } from "../../styles/shared";
 import { colors } from "../../styles/tokens";
 import * as Admin from "./Admin.styles";
 
-interface AdminCotizacionesProps {
-  cotizaciones: Cotizacion[];
-  setCotizaciones: React.Dispatch<React.SetStateAction<Cotizacion[]>>;
-}
-
 const ESTADOS: EstadoCotizacion[] = ["pendiente", "contactado", "cerrada"];
 
-export function AdminCotizaciones({ cotizaciones, setCotizaciones }: AdminCotizacionesProps) {
+export function AdminCotizaciones() {
+  const { cotizaciones, loading, error, refetch } = useCotizaciones();
+  const { productos } = useProductos();
   const { sedes } = useSedes();
 
-  function cambiarEstado(id: number, estado: EstadoCotizacion) {
-    setCotizaciones((prev) => prev.map((c) => (c.id === id ? { ...c, estado } : c)));
+  const productoNombre = (id: string) => productos.find((p) => p.id === id)?.nombre ?? "—";
+  const sedeCiudad = (id: string) => sedes.find((s) => s.id === id)?.ciudad ?? "—";
+
+  async function cambiarEstado(id: string, estado: EstadoCotizacion) {
+    await cotizacionesApi.actualizarEstadoCotizacion(id, estado);
+    refetch();
   }
 
-  function contactarPorWA(c: Cotizacion) {
-    openWA(encodeURIComponent(`Hola ${c.nombre}! Te contactamos de OptiBlue por tu cotización de ${c.montura} por $${c.total}.`), getSedeWhatsapp(sedes, c.sede));
+  function contactarPorWA(nombre: string, productoId: string, total: number, sedeId: string) {
+    openWA(encodeURIComponent(`Hola ${nombre}! Te contactamos de OptiBlue por tu cotización de ${productoNombre(productoId)} por $${total}.`), getSedeWhatsapp(sedes, sedeCiudad(sedeId)));
   }
+
+  if (loading) return <p style={{ color: colors.slate400 }}>Cargando cotizaciones…</p>;
+  if (error) return <p style={{ color: "crimson" }}>{error}</p>;
 
   return (
     <table style={table}>
@@ -43,7 +50,7 @@ export function AdminCotizaciones({ cotizaciones, setCotizaciones }: AdminCotiza
               <div style={{ fontWeight: 600 }}>{c.nombre}</div>
               <div style={{ fontSize: 12, color: colors.slate500 }}>{c.telefono}</div>
             </td>
-            <td style={td}>{c.montura}</td>
+            <td style={td}>{productoNombre(c.productoId)}</td>
             <td style={{ ...td, fontSize: 12 }}>
               OD {c.od || "—"} / OI {c.oi || "—"}
             </td>
@@ -61,7 +68,7 @@ export function AdminCotizaciones({ cotizaciones, setCotizaciones }: AdminCotiza
               </select>
             </td>
             <td style={td}>
-              <button onClick={() => contactarPorWA(c)} style={Admin.actionBtn("confirm")}>
+              <button onClick={() => contactarPorWA(c.nombre, c.productoId, c.total, c.sedeId)} style={Admin.actionBtn("confirm")}>
                 💬
               </button>
             </td>

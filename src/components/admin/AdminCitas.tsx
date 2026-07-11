@@ -1,31 +1,32 @@
-import type { Cita, EstadoCita } from "../../types";
+import type { EstadoCita } from "../../types";
+import { useCitas } from "../../hooks/useCitas";
 import { useSedes } from "../../hooks/useSedes";
+import { citasApi } from "../../lib/api/citas";
 import { openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { table, th, td } from "../../styles/shared";
 import { colors } from "../../styles/tokens";
 import * as Admin from "./Admin.styles";
 
-interface AdminCitasProps {
-  citas: Cita[];
-  setCitas: React.Dispatch<React.SetStateAction<Cita[]>>;
-}
-
 const ESTADOS: EstadoCita[] = ["pendiente", "confirmada", "completada", "cancelada"];
 
-export function AdminCitas({ citas, setCitas }: AdminCitasProps) {
+export function AdminCitas() {
+  const { citas, loading, error, refetch } = useCitas();
   const { sedes } = useSedes();
 
-  function cambiarEstado(id: number, estado: EstadoCita) {
-    setCitas((prev) => prev.map((c) => (c.id === id ? { ...c, estado } : c)));
+  const sedeCiudad = (id: string) => sedes.find((s) => s.id === id)?.ciudad ?? "—";
+
+  async function cambiarEstado(id: string, estado: EstadoCita) {
+    await citasApi.actualizarEstadoCita(id, estado);
+    refetch();
   }
 
-  function eliminar(id: number) {
-    if (window.confirm("¿Eliminar cita?")) setCitas((prev) => prev.filter((c) => c.id !== id));
+  function confirmarPorWA(nombre: string, sedeId: string, fecha: string, hora: string) {
+    const ciudad = sedeCiudad(sedeId);
+    openWA(encodeURIComponent(`Hola ${nombre}! Te confirmamos tu cita en OptiBlue ${ciudad} el ${fecha} a las ${hora}.`), getSedeWhatsapp(sedes, ciudad));
   }
 
-  function confirmarPorWA(c: Cita) {
-    openWA(encodeURIComponent(`Hola ${c.nombre}! Te confirmamos tu cita en OptiBlue ${c.sede} el ${c.fecha} a las ${c.hora}.`), getSedeWhatsapp(sedes, c.sede));
-  }
+  if (loading) return <p style={{ color: colors.slate400 }}>Cargando citas…</p>;
+  if (error) return <p style={{ color: "crimson" }}>{error}</p>;
 
   return (
     <table style={table}>
@@ -46,7 +47,7 @@ export function AdminCitas({ citas, setCitas }: AdminCitasProps) {
               <div style={{ fontWeight: 600 }}>{c.nombre}</div>
               <div style={{ fontSize: 12, color: colors.slate500 }}>{c.telefono}</div>
             </td>
-            <td style={td}>{c.sede}</td>
+            <td style={td}>{sedeCiudad(c.sedeId)}</td>
             <td style={td}>
               {c.fecha} · {c.hora}
             </td>
@@ -61,11 +62,8 @@ export function AdminCitas({ citas, setCitas }: AdminCitasProps) {
               </select>
             </td>
             <td style={td}>
-              <button onClick={() => confirmarPorWA(c)} style={Admin.actionBtn("confirm")}>
+              <button onClick={() => confirmarPorWA(c.nombre, c.sedeId, c.fecha, c.hora)} style={Admin.actionBtn("confirm")}>
                 💬 WA
-              </button>
-              <button onClick={() => eliminar(c.id)} style={Admin.actionBtn("delete")}>
-                Eliminar
               </button>
             </td>
           </tr>

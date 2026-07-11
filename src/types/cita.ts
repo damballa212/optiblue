@@ -1,10 +1,10 @@
 export type EstadoCita = "pendiente" | "confirmada" | "completada" | "cancelada";
 
 export interface Cita {
-  id: number;
+  id: string;
   nombre: string;
   telefono: string;
-  sede: string;
+  sedeId: string;
   fecha: string;
   hora: string;
   motivo: string;

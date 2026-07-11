@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { INITIAL_CITAS, INITIAL_COTIZACIONES } from "./data";
 import { app } from "./styles/app.styles";
 import { NavBar, type PageKey } from "./components/layout/NavBar";
 import { Footer } from "./components/layout/Footer";
@@ -13,13 +12,11 @@ import { AdminPanel } from "./components/admin/AdminPanel";
 export default function App() {
   const [page, setPage] = useState<PageKey>("home");
   const [adminMode, setAdminMode] = useState(false);
-  const [citas, setCitas] = useState(INITIAL_CITAS);
-  const [cotizaciones, setCotizaciones] = useState(INITIAL_COTIZACIONES);
 
   if (adminMode) {
     return (
       <div style={app}>
-        <AdminPanel citas={citas} setCitas={setCitas} cotizaciones={cotizaciones} setCotizaciones={setCotizaciones} onExit={() => setAdminMode(false)} />
+        <AdminPanel onExit={() => setAdminMode(false)} />
       </div>
     );
   }

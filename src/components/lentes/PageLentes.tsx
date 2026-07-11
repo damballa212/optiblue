@@ -4,7 +4,9 @@ import { useProductos } from "../../hooks/useProductos";
 import { useCategorias } from "../../hooks/useCategorias";
 import { useSedes } from "../../hooks/useSedes";
 import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
-import { section, sectionTag, sectionH2, sectionSub, grid, formGroupFull, label, select, btnPrimary, btnGhost, btnWA } from "../../styles/shared";
+import { cotizacionesApi } from "../../lib/api/cotizaciones";
+import { AgendarCitaModal } from "../shared/AgendarCitaModal";
+import { section, sectionTag, sectionH2, sectionSub, grid, formGroupFull, label, input, select, btnPrimary, btnGhost, btnWA } from "../../styles/shared";
 import * as S from "./PageLentes.styles";
 
 const GRAD_STEPS = ["", "0.25", "0.50", "0.75", "1.00", "1.25", "1.50", "1.75", "2.00", "2.25", "2.50", "2.75", "3.00", "3.50", "4.00", "4.50", "5.00", "5.50", "6.00"];
@@ -33,6 +35,11 @@ export function PageLentes() {
   const { sedes } = useSedes();
   const [sede, setSede] = useState("");
   const [step, setStep] = useState(1);
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mostrarAgendarCita, setMostrarAgendarCita] = useState(false);
 
   useEffect(() => {
     if (!sede && sedes.length > 0) setSede(sedes[0].ciudad);
@@ -46,15 +53,49 @@ export function PageLentes() {
     setExtras((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
   }
 
-  function enviarWA() {
-    const extrasLabels = extras.map((k) => EXTRAS_LENTES.find((e) => e.key === k)?.label ?? k);
-    const msg = buildWAMessage({ tipo: "cotizacion", montura: monObj?.nombre, od, oi, astOD, astOI, extras: extrasLabels, total, sede });
-    openWA(msg, getSedeWhatsapp(sedes, sede));
+  async function enviarWA() {
+    if (!nombre.trim() || !telefono.trim() || !monObj) {
+      setError("Completa tu nombre y teléfono para continuar.");
+      return;
+    }
+    const sedeObj = sedes.find((s) => s.ciudad === sede);
+    if (!sedeObj) {
+      setError("Elige una sede.");
+      return;
+    }
+
+    setEnviando(true);
+    setError(null);
+    try {
+      // La cotización (con la fórmula óptica completa) se registra en
+      // Firestore ANTES de abrir WhatsApp — nunca vive en el producto
+      // (ver decisión 2026-07-11).
+      await cotizacionesApi.crearCotizacion({
+        nombre: nombre.trim(),
+        telefono: telefono.trim(),
+        sedeId: sedeObj.id,
+        productoId: monObj.id,
+        od,
+        oi,
+        astigmatismoOD: astOD,
+        astigmatismoOI: astOI,
+        extras,
+        total,
+        fecha: new Date().toISOString().slice(0, 10),
+      });
+      const extrasLabels = extras.map((k) => EXTRAS_LENTES.find((e) => e.key === k)?.label ?? k);
+      const msg = buildWAMessage({ tipo: "cotizacion", montura: monObj.nombre, od, oi, astOD, astOI, extras: extrasLabels, total, sede });
+      openWA(msg, getSedeWhatsapp(sedes, sede));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo registrar tu cotización. Intenta de nuevo.");
+    } finally {
+      setEnviando(false);
+    }
   }
 
-  function citaWA() {
-    const msg = buildWAMessage({ tipo: "cita", sede, montura: monObj?.nombre });
-    openWA(msg, getSedeWhatsapp(sedes, sede));
+  function citaAgendada(info: { sede: string }) {
+    const msg = buildWAMessage({ tipo: "cita", sede: info.sede, montura: monObj?.nombre });
+    openWA(msg, getSedeWhatsapp(sedes, info.sede));
   }
 
   return (
@@ -146,7 +187,7 @@ export function PageLentes() {
             </div>
           </div>
           <div style={S.actionsRow}>
-            <button style={{ ...btnGhost, width: "auto" }} onClick={citaWA}>
+            <button style={{ ...btnGhost, width: "auto" }} onClick={() => setMostrarAgendarCita(true)}>
               📅 No tengo receta — agendar examen
             </button>
             <button style={{ ...btnPrimary, width: "auto", padding: "10px 22px" }} onClick={() => setStep(2)}>
@@ -232,6 +273,15 @@ export function PageLentes() {
             </div>
             <div style={S.cotizNum}>${total}</div>
           </div>
+          {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
+          <div style={formGroupFull}>
+            <label style={label}>Tu nombre</label>
+            <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
+          </div>
+          <div style={formGroupFull}>
+            <label style={label}>Tu teléfono</label>
+            <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
+          </div>
           <div style={formGroupFull}>
             <label style={label}>Sede de entrega</label>
             <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
@@ -242,17 +292,19 @@ export function PageLentes() {
               ))}
             </select>
           </div>
-          <button style={btnWA} onClick={enviarWA}>
-            💬 Enviar cotización por WhatsApp
+          <button style={btnWA} onClick={enviarWA} disabled={enviando}>
+            {enviando ? "Enviando…" : "💬 Enviar cotización por WhatsApp"}
           </button>
-          <button style={{ ...btnGhost, marginTop: 10 }} onClick={citaWA}>
+          <button style={{ ...btnGhost, marginTop: 10 }} onClick={() => setMostrarAgendarCita(true)} disabled={enviando}>
             📅 Agendar examen visual primero
           </button>
-          <button style={{ ...btnGhost, marginTop: 8 }} onClick={() => setStep(2)}>
+          <button style={{ ...btnGhost, marginTop: 8 }} onClick={() => setStep(2)} disabled={enviando}>
             ← Atrás
           </button>
         </div>
       )}
+
+      {mostrarAgendarCita && <AgendarCitaModal motivo="Examen de la vista" onClose={() => setMostrarAgendarCita(false)} onAgendada={citaAgendada} />}
     </div>
   );
 }
