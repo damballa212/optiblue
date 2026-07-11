@@ -25,7 +25,10 @@ export function GoogleAuthGate({ children }: GoogleAuthGateProps) {
     setError(null);
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch {
+    } catch (e) {
+      // Log del error real para diagnóstico — el mensaje a la persona queda
+      // genérico a propósito, pero no hay que tragarse la causa real.
+      console.error("Google sign-in falló:", e);
       setError("No se pudo iniciar sesión. Intenta de nuevo.");
     } finally {
       setEnviando(false);
