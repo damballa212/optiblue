@@ -3,11 +3,12 @@ import type { Cita, Cotizacion } from "../../types";
 import * as S from "./Admin.styles";
 import { AdminDash } from "./AdminDash";
 import { AdminProductos } from "./AdminProductos";
+import { AdminPedidos } from "./AdminPedidos";
 import { AdminCitas } from "./AdminCitas";
 import { AdminCotizaciones } from "./AdminCotizaciones";
 import { AdminSedes } from "./AdminSedes";
 
-type Seccion = "dashboard" | "productos" | "citas" | "cotizaciones" | "sedes";
+type Seccion = "dashboard" | "productos" | "pedidos" | "citas" | "cotizaciones" | "sedes";
 
 interface AdminPanelProps {
   citas: Cita[];
@@ -20,6 +21,7 @@ interface AdminPanelProps {
 const SECTIONS: { key: Seccion; icon: string; label: string }[] = [
   { key: "dashboard", icon: "📊", label: "Dashboard" },
   { key: "productos", icon: "👓", label: "Productos" },
+  { key: "pedidos", icon: "🛒", label: "Pedidos" },
   { key: "citas", icon: "📅", label: "Citas" },
   { key: "cotizaciones", icon: "💰", label: "Cotizaciones" },
   { key: "sedes", icon: "📍", label: "Sedes" },
@@ -58,6 +60,7 @@ export function AdminPanel({ citas, setCitas, cotizaciones, setCotizaciones, onE
         <div style={S.adminContent}>
           {seccion === "dashboard" && <AdminDash citas={citas} cotizaciones={cotizaciones} />}
           {seccion === "productos" && <AdminProductos />}
+          {seccion === "pedidos" && <AdminPedidos />}
           {seccion === "citas" && <AdminCitas citas={citas} setCitas={setCitas} />}
           {seccion === "cotizaciones" && <AdminCotizaciones cotizaciones={cotizaciones} setCotizaciones={setCotizaciones} />}
           {seccion === "sedes" && <AdminSedes />}

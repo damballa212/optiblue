@@ -5,3 +5,4 @@ export type { Cita, EstadoCita } from "./cita";
 export type { Cotizacion, EstadoCotizacion } from "./cotizacion";
 export type { ExtraLente } from "./extra";
 export type { Servicio } from "./servicio";
+export type { Pedido, EstadoPedido } from "./pedido";
