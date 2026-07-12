@@ -1,16 +1,18 @@
 # OptiBlue
 
-Storefront público y panel administrativo de OptiBlue. El sitio permite consultar catálogo y sedes, solicitar reservas, cotizaciones y citas, y gestionar la operación desde un panel protegido.
+Storefront público y panel administrativo de OptiBlue. El sitio permite consultar catálogo y sedes, cotizar lentes con fórmula óptica, solicitar reservas y citas, y gestionar la operación desde un panel administrativo mobile-first protegido.
 
-Producción: [optiblue-prod.web.app](https://optiblue-prod.web.app)
+Producción: [optiblue-prod.web.app](https://optiblue-prod.web.app) · Backend: [`optiblue-backend`](https://github.com/damballa212/optiblue-backend)
 
 ## Estado real
 
-- El frontend usa React Router con URLs públicas y rutas `/admin/*` separadas.
-- Catálogo, categorías y sedes se leen directamente desde Firestore.
+- React Router con URLs públicas y rutas `/admin/*` (rutas reales, no estado de React — recargar cualquier sección del panel conserva la pantalla).
+- Catálogo, categorías y sedes se leen directamente desde Firestore (`onSnapshot`, tiempo real).
 - Pedidos, citas y cotizaciones se registran mediante Cloud Functions antes de intentar abrir WhatsApp.
+- El total de una cotización lo calcula siempre el backend (producto real + configuración de precios administrable) — el frontend nunca lo decide ni lo envía. Ver `optiblue-backend/README.md`, sección "Integridad de precios".
 - Las escrituras administrativas pasan por Cloud Functions y requieren Firebase Auth con custom claim `admin: true`.
-- El panel y Firebase Auth se cargan bajo demanda; las páginas públicas también están separadas por ruta.
+- El panel admin es una "bandeja de trabajo operativa" mobile-first: `Hoy` (pendientes accionables), bottom nav en mobile / sidebar en desktop, cambio de estado con confirmación y **deshacer**, WhatsApp con mensaje editable, y mantenimiento de catálogo/sedes con validación y confirmación contextual de borrado (sin `window.confirm`/`alert`).
+- El panel y Firebase Auth se cargan bajo demanda; las páginas públicas también están separadas por ruta (code splitting).
 - El storefront público usa el sistema visual OptiBlue aprobado: Space Grotesk + DM Sans, navy/azul pastel/celeste, iconografía Lucide y fallbacks ópticos sin emojis.
 - Reserva, cotización y solicitud de cita permiten continuar con nombre y teléfono; Google es solo un atajo opcional de autocompletado.
 - Los datos reales de catálogo y sedes siguen incompletos. No se deben reemplazar con información inventada.
@@ -68,28 +70,48 @@ npm run dev
 # Type-check y build de producción
 npm run build
 
-# Pruebas unitarias
+# Pruebas unitarias (12 archivos, 38 tests)
 npm test
+
+# Lint
+npm run lint
 
 # Previsualización del contenido de dist/
 npm run preview
 ```
 
-`npm run lint` existe en `package.json`, pero actualmente no es ejecutable porque ESLint no está instalado como dependencia del repositorio.
+`npm run lint` usa **oxlint** (Oxc/Rust), no ESLint. Este proyecto usa **TypeScript 7** (compilador nativo en Go), y `typescript-eslint` — incluido su último alpha — no lo soporta todavía: falla al importarse contra el compilador. `oxlint` no depende de `typescript-eslint` ni de `typescript` para nada, así que no choca. El chequeo de tipos real lo cubre `tsc -b` en `npm run build`.
 
-La validación visual local del storefront se realiza con Firebase Emulator y Playwright en `390`, `768`, `1024` y `1440 px`; el runner usado durante el rediseño es temporal y no forma parte del producto.
+La validación visual del storefront y del panel admin se hace con Firebase Emulator + Playwright en `390`, `768` y `1440 px` — sesiones puntuales, no hay una suite de Playwright versionada en el repo todavía.
 
 ## Arquitectura relevante
 
 ```text
 src/
-├── components/       Storefront, flujos públicos y panel administrativo
-├── hooks/            Suscripciones de lectura a Firestore
-├── lib/api/          Clientes de Cloud Functions
-├── lib/auth/         Firebase Auth y autorización administrativa
-├── lib/firestore.ts  Instancia pública de Firestore
-├── styles/           Tokens y estilos compartidos
-└── types/            Contratos TypeScript del modelo V1
+├── components/
+│   ├── admin/          Panel administrativo (bandeja operativa, ver detalle abajo)
+│   ├── catalogo/        Catálogo, filtros, detalle de producto
+│   ├── lentes/           Cotizador con fórmula óptica (PageLentes)
+│   ├── sedes/, servicios/, home/  Storefront público
+│   └── shared/           Componentes reutilizables (modales, estados, WhatsApp)
+├── hooks/               Suscripciones de lectura a Firestore + hooks de datos vía Function
+├── lib/api/             Clientes de Cloud Functions (uno por módulo backend)
+├── lib/auth/            Firebase Auth y autorización administrativa
+├── lib/firestore.ts     Instancia pública de Firestore
+├── styles/               Tokens y estilos compartidos del storefront
+└── types/                Contratos TypeScript del modelo V1 (espejo de los schemas Zod del backend)
+```
+
+Estructura del panel admin (`src/components/admin/`):
+
+```text
+admin/
+├── AdminRoutes.tsx     Rutas reales bajo /admin/* (login, hoy, pedidos, citas, cotizaciones, catalogo, sedes, mas)
+├── AdminShell.tsx       Layout: sidebar desktop / bottom nav mobile, contadores de pendientes
+├── data/                AdminOperationsContext: fuente única de datos del panel (pedidos/citas/cotizaciones/sedes/productos)
+├── domain/               Lógica pura testeada: prioridad de "Hoy", filtros, validación de formularios, estado, mensajes de WhatsApp
+├── pages/                Una página por sección (AdminTodayPage, AdminWorkPage genérica para pedido/cita/cotización, AdminCatalogPage, AdminLocationsPage, AdminMorePage)
+└── ui/                   Piezas compartidas: detalle responsive, editor de estado con deshacer, composer de WhatsApp, confirmación de borrado, estados loading/error/empty
 ```
 
 El storefront no importa Firebase Auth de forma estática. `apiRequest` solo carga Auth cuando una operación administrativa lo solicita explícitamente.
