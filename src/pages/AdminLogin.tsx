@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { ArrowLeft, LockKeyhole, ShieldCheck } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../lib/auth/firebaseAuth";
 import { useAuth } from "../lib/auth/AuthContext";
-import * as S from "./AdminLogin.styles";
+import styles from "./AdminLogin.module.css";
 
 // Página standalone — a propósito no comparte NavBar/Footer del sitio
 // público. Solo login: no hay "crear cuenta" acá (ver core/auth.ts del
@@ -17,7 +18,7 @@ export function AdminLogin() {
   const [error, setError] = useState<string | null>(null);
 
   if (!loading && user && isAdmin) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/admin/hoy" replace />;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -26,7 +27,7 @@ export function AdminLogin() {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/admin");
+      navigate("/admin/hoy");
     } catch {
       // Mensaje genérico a propósito: no revelar si el email existe o no.
       setError("Correo o contraseña incorrectos.");
@@ -36,37 +37,77 @@ export function AdminLogin() {
   }
 
   return (
-    <div style={S.page}>
-      <div style={S.card}>
-        <div style={S.brand}>
-          <div style={S.brandCircle}>👁</div>
-          <span style={S.brandText}>
-            Opti<span style={S.brandBlue}>Blue</span>
+    <div className={styles.page}>
+      <aside className={styles.brandPanel}>
+        <div className={styles.brand}>
+          <span className={styles.brandMark}>
+            <i />
           </span>
+          <span>OPTIBLUE</span>
         </div>
-        <div style={S.title}>Panel de administración</div>
-        <div style={S.subtitle}>Iniciá sesión para gestionar el catálogo, pedidos y citas.</div>
+        <div className={styles.brandMessage}>
+          <ShieldCheck aria-hidden="true" />
+          <h1>Operación diaria</h1>
+          <p>Acceso reservado al personal autorizado de OptiBlue.</p>
+        </div>
+        <small>Panel administrativo</small>
+      </aside>
+      <main className={styles.loginArea}>
+        <div className={styles.mobileBrand}>
+          <span className={styles.brandMark}>
+            <i />
+          </span>
+          <strong>OPTIBLUE ADMIN</strong>
+        </div>
+        <section
+          className={styles.loginForm}
+          aria-labelledby="admin-login-title"
+        >
+          <span className={styles.eyebrow}>Acceso administrativo</span>
+          <h2 id="admin-login-title">Iniciar sesión</h2>
+          <p>Usa las credenciales asignadas para gestionar la operación.</p>
 
-        {error && <div style={S.errorBox}>{error}</div>}
+          {error && (
+            <div className={styles.errorBox} role="alert">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <div style={S.formGroup}>
-            <label style={S.label}>Correo</label>
-            <input style={S.input} type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" />
-          </div>
-          <div style={S.formGroup}>
-            <label style={S.label}>Contraseña</label>
-            <input style={S.input} type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-          </div>
-          <button style={S.submitBtn} type="submit" disabled={enviando}>
-            {enviando ? "Ingresando…" : "Ingresar"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <label>
+              <span>Correo</span>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+                inputMode="email"
+                autoFocus
+              />
+            </label>
+            <label>
+              <span>Contraseña</span>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+            </label>
+            <button type="submit" disabled={enviando}>
+              <LockKeyhole aria-hidden="true" />
+              {enviando ? "Ingresando..." : "Ingresar al panel"}
+            </button>
+          </form>
 
-        <Link to="/" style={S.backLink}>
-          ← Volver al sitio
-        </Link>
-      </div>
+          <Link to="/">
+            <ArrowLeft aria-hidden="true" />
+            Volver al sitio público
+          </Link>
+        </section>
+      </main>
     </div>
   );
 }

@@ -1,0 +1,165 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  padding: 4px 7px;
+  border: 1px solid #c8d2dd;
+  border-radius: 4px;
+  background: #f7f8fa;
+  color: #4e5d70;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.attention {
+  border-color: #e8d39c;
+  background: #fff7e3;
+  color: #8b5900;
+}
+.progress {
+  border-color: #c9d6fb;
+  background: #f1f4ff;
+  color: #174edc;
+}
+.resolved {
+  background: #f1f3f5;
+  color: #4e5d70;
+}
+.closed {
+  background: #f1f3f5;
+  color: #4e5d70;
+}
+.closed i {
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+.secondaryButton,
+.dangerButton,
+.whatsappButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 15px;
+  border-radius: 5px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.secondaryButton {
+  border: 1px solid #aab8c6;
+  background: #fff;
+  color: #002d63;
+}
+.dangerButton {
+  border: 1px solid #b52f43;
+  background: #b52f43;
+  color: #fff;
+}
+.whatsappButton {
+  border: 1px solid #168a44;
+  background: #168a44;
+  color: #fff;
+}
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.whatsappButton:disabled {
+  border-color: #cbd4dc;
+  background: #e8ecef;
+  color: #7c8996;
+  cursor: not-allowed;
+}
+.confirmBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.confirmBody > span {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #f9ecef;
+  color: #b52f43;
+}
+.confirmBody p {
+  margin: 5px 0;
+  color: #526276;
+  line-height: 1.55;
+}
+.composer {
+  display: grid;
+  gap: 12px;
+}
+.phoneTarget {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #dce3ea;
+  border-radius: 6px;
+  background: #f8fafb;
+  color: #168a44;
+}
+.phoneTarget strong,
+.phoneTarget span {
+  display: block;
+}
+.phoneTarget strong {
+  color: #172438;
+  font-size: 13px;
+}
+.phoneTarget span {
+  margin-top: 3px;
+  color: #65758a;
+  font-size: 12px;
+}
+.composer label {
+  color: #002d63;
+  font-size: 12px;
+  font-weight: 750;
+}
+.composer textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #aab8c6;
+  border-radius: 5px;
+  color: #172438;
+  line-height: 1.55;
+  resize: vertical;
+}
+.infoNote,
+.inlineError {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+  border-left: 3px solid #54bfe8;
+  background: #f3fafc;
+  color: #3e6078;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.inlineError {
+  border-left-color: #b52f43;
+  background: #fff;
+  color: #8d2a39;
+}
+@media (max-width: 520px) {
+  .secondaryButton,
+  .dangerButton,
+  .whatsappButton {
+    flex: 1;
+    padding: 0 10px;
+  }
+}

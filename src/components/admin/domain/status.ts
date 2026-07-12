@@ -1,4 +1,8 @@
-import type { EstadoCita, EstadoCotizacion, EstadoPedido } from "../../../types";
+import type {
+  EstadoCita,
+  EstadoCotizacion,
+  EstadoPedido,
+} from "../../../types";
 import type { AdminEntityKind } from "./attention";
 
 export type AdminStatusTone = "attention" | "progress" | "resolved" | "closed";
@@ -14,7 +18,9 @@ type StatusByKind = {
   cotizacion: EstadoCotizacion;
 };
 
-const STATUS_META: { [K in AdminEntityKind]: Record<StatusByKind[K], AdminStatusMeta> } = {
+const STATUS_META: {
+  [K in AdminEntityKind]: Record<StatusByKind[K], AdminStatusMeta>;
+} = {
   pedido: {
     pendiente: { label: "Pendiente", tone: "attention" },
     pagado: { label: "Pagado", tone: "resolved" },
@@ -33,7 +39,10 @@ const STATUS_META: { [K in AdminEntityKind]: Record<StatusByKind[K], AdminStatus
   },
 };
 
-export function getAdminStatusMeta<K extends AdminEntityKind>(kind: K, status: StatusByKind[K]): AdminStatusMeta {
+export function getAdminStatusMeta<K extends AdminEntityKind>(
+  kind: K,
+  status: StatusByKind[K],
+): AdminStatusMeta {
   return STATUS_META[kind][status];
 }
 
