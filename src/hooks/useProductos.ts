@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../lib/firestore";
 import type { Producto } from "../types";
 
 // Lectura directa de Firestore (SDK cliente) — sin pasar por Functions.

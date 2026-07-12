@@ -9,6 +9,6 @@ export const pedidosApi = {
   // Público: cualquier visitante registra su pedido antes de ir a WhatsApp.
   crearPedido: (input: PedidoInput) => apiRequest<Pedido>(BASE_URL, "/pedidos", { method: "POST", body: JSON.stringify(input) }),
   // Back office: requiere sesión admin (backend: core/auth.ts).
-  listarPedidos: () => apiRequest<Pedido[]>(BASE_URL, "/pedidos"),
-  actualizarEstadoPedido: (id: string, estado: EstadoPedido) => apiRequest<Pedido>(BASE_URL, `/pedidos/${id}`, { method: "PATCH", body: JSON.stringify({ estado }) }),
+  listarPedidos: () => apiRequest<Pedido[]>(BASE_URL, "/pedidos", undefined, true),
+  actualizarEstadoPedido: (id: string, estado: EstadoPedido) => apiRequest<Pedido>(BASE_URL, `/pedidos/${id}`, { method: "PATCH", body: JSON.stringify({ estado }) }, true),
 };

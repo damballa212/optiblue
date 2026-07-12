@@ -1,0 +1,101 @@
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.skeletonCard {
+  padding-bottom: 16px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.skeletonMedia,
+.skeletonLine,
+.skeletonLineShort {
+  display: block;
+  background: linear-gradient(90deg, #e2eaed 20%, #f4f7f8 45%, #e2eaed 70%);
+  background-size: 220% 100%;
+  animation: shimmer 1.3s linear infinite;
+}
+
+.skeletonMedia {
+  height: 180px;
+}
+
+.skeletonLine,
+.skeletonLineShort {
+  height: 13px;
+  margin: 14px 16px 0;
+}
+
+.skeletonLineShort {
+  width: 48%;
+}
+
+.state {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--brand-sky);
+  background: var(--white);
+}
+
+.state > svg {
+  color: var(--brand-navy);
+}
+
+.state h3 {
+  margin: 0;
+  color: var(--brand-navy);
+  font-family: "Space Grotesk Variable", sans-serif;
+  font-size: 18px;
+}
+
+.state p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.state button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  border: 1px solid var(--brand-navy);
+  border-radius: 3px;
+  background: var(--white);
+  color: var(--brand-navy);
+  font-weight: 700;
+}
+
+.error {
+  border-left-color: var(--danger);
+}
+
+.error > svg {
+  color: var(--danger);
+}
+
+@keyframes shimmer {
+  to { background-position: -220% 0; }
+}
+
+@media (max-width: 767px) {
+  .skeletonGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .skeletonCard:nth-child(3) {
+    display: none;
+  }
+
+  .skeletonMedia {
+    height: 140px;
+  }
+}

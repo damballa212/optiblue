@@ -1,39 +1,39 @@
-import { useState, useEffect } from "react";
+import { CalendarSearch, Check, CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Glasses } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { EXTRAS_LENTES } from "../../data";
-import { useProductos } from "../../hooks/useProductos";
 import { useCategorias } from "../../hooks/useCategorias";
+import { useProductos } from "../../hooks/useProductos";
 import { useSedes } from "../../hooks/useSedes";
-import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { cotizacionesApi } from "../../lib/api/cotizaciones";
+import { buildWAMessage, getSedeWhatsapp, openWA } from "../../lib/whatsapp";
 import { AgendarCitaModal } from "../shared/AgendarCitaModal";
-import { section, sectionTag, sectionH2, sectionSub, grid, formGroupFull, label, input, select, btnPrimary, btnGhost, btnWA } from "../../styles/shared";
-import { colors } from "../../styles/tokens";
-import * as S from "./PageLentes.styles";
+import { DataState } from "../shared/DataState";
+import { OptionalGooglePrefill } from "../shared/OptionalGooglePrefill";
+import form from "../shared/PublicForm.module.css";
+import styles from "./PageLentes.module.css";
 
 const GRAD_STEPS = ["", "0.25", "0.50", "0.75", "1.00", "1.25", "1.50", "1.75", "2.00", "2.25", "2.50", "2.75", "3.00", "3.50", "4.00", "4.50", "5.00", "5.50", "6.00"];
-
-const STEP_LABELS = ["1. Montura y graduación", "2. Extras", "3. Sede y cotización"];
-
+const STEP_LABELS = ["Montura y graduación", "Extras", "Sede y cotización"];
 const LENTE_BASE = 10;
 
-export function PageLentes() {
-  const { productos } = useProductos();
-  const { categorias } = useCategorias();
-  const monturasCategoriaId = categorias.find((c) => c.key === "monturas")?.id;
-  const monturas = productos.filter((p) => p.categoriaId === monturasCategoriaId);
-  const [montura, setMontura] = useState<string>("");
+function GraduationSelect({ id, label, value, onChange, astigmatism = false }: { id: string; label: string; value: string; onChange: (value: string) => void; astigmatism?: boolean }) {
+  return <div className={form.field}><label htmlFor={id}>{label}</label><select id={id} value={value} onChange={(event) => onChange(event.target.value)}><option value="">{astigmatism ? "Sin astigmatismo" : "Sin corrección"}</option>{GRAD_STEPS.slice(1).map((step) => <option key={`-${step}`} value={`-${step}`}>-{step}</option>)}{!astigmatism && GRAD_STEPS.slice(1).map((step) => <option key={`+${step}`} value={`+${step}`}>+{step}</option>)}</select></div>;
+}
 
-  // La lista de monturas llega asíncrono (Firestore); una vez disponible,
-  // preseleccionamos la primera si el usuario todavía no eligió ninguna.
-  useEffect(() => {
-    if (!montura && monturas.length > 0) setMontura(monturas[0].id);
-  }, [montura, monturas]);
+export function PageLentes() {
+  const [searchParams] = useSearchParams();
+  const { productos, loading: productosLoading, error: productosError } = useProductos();
+  const { categorias, loading: categoriasLoading } = useCategorias();
+  const { sedes } = useSedes();
+  const monturasCategoriaId = categorias.find((category) => category.key === "monturas")?.id;
+  const monturas = productos.filter((product) => product.categoriaId === monturasCategoriaId);
+  const [montura, setMontura] = useState("");
   const [od, setOd] = useState("");
   const [oi, setOi] = useState("");
   const [astOD, setAstOD] = useState("");
   const [astOI, setAstOI] = useState("");
   const [extras, setExtras] = useState<string[]>([]);
-  const { sedes } = useSedes();
   const [sede, setSede] = useState("");
   const [step, setStep] = useState(1);
   const [nombre, setNombre] = useState("");
@@ -41,284 +41,96 @@ export function PageLentes() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmacion, setConfirmacion] = useState<string | null>(null);
-  const [mostrarAgendarCita, setMostrarAgendarCita] = useState(false);
+  const [mostrarCita, setMostrarCita] = useState(false);
+
+  useEffect(() => {
+    if (montura || monturas.length === 0) return;
+    const requestedProduct = searchParams.get("producto");
+    setMontura(monturas.some((item) => item.id === requestedProduct) ? requestedProduct! : monturas[0].id);
+  }, [montura, monturas, searchParams]);
 
   useEffect(() => {
     if (!sede && sedes.length > 0) setSede(sedes[0].ciudad);
   }, [sede, sedes]);
 
-  const monObj = monturas.find((m) => m.id === montura);
-  const extrasTotal = extras.reduce((sum, k) => sum + (EXTRAS_LENTES.find((e) => e.key === k)?.precio ?? 0), 0);
-  const total = (monObj?.precio ?? 0) + extrasTotal + LENTE_BASE;
+  const selectedFrame = monturas.find((item) => item.id === montura);
+  const extrasTotal = extras.reduce((sum, key) => sum + (EXTRAS_LENTES.find((extra) => extra.key === key)?.precio ?? 0), 0);
+  const total = (selectedFrame?.precio ?? 0) + extrasTotal + LENTE_BASE;
 
-  function toggleExtra(k: string) {
-    setExtras((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
+  function toggleExtra(key: string) {
+    setExtras((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key]);
   }
 
-  async function enviarWA() {
-    if (!nombre.trim() || !telefono.trim() || !monObj) {
-      setError("Completa tu nombre y teléfono para continuar.");
+  async function registerQuote() {
+    if (!nombre.trim() || !telefono.trim() || !selectedFrame) {
+      setError("Completa nombre, teléfono y montura para continuar.");
       return;
     }
-    const sedeObj = sedes.find((s) => s.ciudad === sede);
-    if (!sedeObj) {
+    const selectedLocation = sedes.find((item) => item.ciudad === sede);
+    if (!selectedLocation) {
       setError("Elige una sede.");
       return;
     }
-
     setEnviando(true);
     setError(null);
-    setConfirmacion(null);
     try {
-      // La cotización (con la fórmula óptica completa) se registra en
-      // Firestore ANTES de abrir WhatsApp — nunca vive en el producto
-      // (ver decisión 2026-07-11).
-      await cotizacionesApi.crearCotizacion({
-        nombre: nombre.trim(),
-        telefono: telefono.trim(),
-        sedeId: sedeObj.id,
-        productoId: monObj.id,
-        od,
-        oi,
-        astigmatismoOD: astOD,
-        astigmatismoOI: astOI,
-        extras,
-        total,
-        fecha: new Date().toISOString().slice(0, 10),
-      });
-      const extrasLabels = extras.map((k) => EXTRAS_LENTES.find((e) => e.key === k)?.label ?? k);
-      const msg = buildWAMessage({ tipo: "cotizacion", montura: monObj.nombre, od, oi, astOD, astOI, extras: extrasLabels, total, sede });
-      const whatsappAbierto = openWA(msg, getSedeWhatsapp(sedes, sede));
-      setConfirmacion(
-        whatsappAbierto
-          ? "Cotización registrada. Se abrió WhatsApp para continuar con la sede."
-          : "Cotización registrada. Esta sede todavía no tiene WhatsApp real configurado; el equipo debe contactarte con el teléfono que dejaste.",
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo registrar tu cotización. Intenta de nuevo.");
+      await cotizacionesApi.crearCotizacion({ nombre: nombre.trim(), telefono: telefono.trim(), sedeId: selectedLocation.id, productoId: selectedFrame.id, od, oi, astigmatismoOD: astOD, astigmatismoOI: astOI, extras, total, fecha: new Date().toISOString().slice(0, 10) });
+      const extraLabels = extras.map((key) => EXTRAS_LENTES.find((extra) => extra.key === key)?.label ?? key);
+      const message = buildWAMessage({ tipo: "cotizacion", montura: selectedFrame.nombre, od, oi, astOD, astOI, extras: extraLabels, total, sede });
+      const opened = openWA(message, getSedeWhatsapp(sedes, sede));
+      setConfirmacion(opened ? "Cotización registrada. Se abrió WhatsApp para continuar con la sede." : "Cotización registrada. La sede todavía no tiene WhatsApp real configurado; el equipo debe contactarte al teléfono indicado.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "No se pudo registrar la cotización. Intenta de nuevo.");
     } finally {
       setEnviando(false);
     }
   }
 
-  function citaAgendada(info: { sede: string }) {
-    const msg = buildWAMessage({ tipo: "cita", sede: info.sede, montura: monObj?.nombre });
-    return openWA(msg, getSedeWhatsapp(sedes, info.sede));
-  }
+  const citaAgendada = (info: { sede: string }) => openWA(buildWAMessage({ tipo: "cita", sede: info.sede, montura: selectedFrame?.nombre }), getSedeWhatsapp(sedes, info.sede));
+  const loading = productosLoading || categoriasLoading;
 
   return (
-    <div style={section}>
-      <div style={sectionTag}>Lentes adaptados</div>
-      <h2 style={sectionH2}>Cotiza tus lentes con tu graduación</h2>
-      <p style={sectionSub}>Completa los datos, elige los extras y te enviamos tu cotización por WhatsApp.</p>
+    <main className={styles.page}>
+      <header className={styles.hero}><span>Lentes adaptados</span><h1>Cotiza con tu fórmula, paso a paso.</h1><p>Selecciona una montura disponible, registra la graduación y revisa el total estimado antes de elegir sede.</p></header>
+      <section className={styles.wizard}>
+        <nav className={styles.steps} aria-label="Pasos de cotización">{STEP_LABELS.map((label, index) => <button key={label} type="button" onClick={() => setStep(index + 1)} className={step === index + 1 ? styles.activeStep : ""}><span>{index + 1}</span>{label}</button>)}</nav>
+        {loading && <DataState kind="loading" title="Cargando monturas" message="Consultando el catálogo disponible." />}
+        {!loading && productosError && <DataState kind="error" title="No pudimos cargar las monturas" message="Intenta de nuevo en unos minutos." />}
+        {!loading && !productosError && monturas.length === 0 && <DataState kind="empty" title="No hay monturas disponibles" message="El catálogo actual no contiene monturas para cotizar." />}
 
-      <div style={S.stepsWrap}>
-        {STEP_LABELS.map((s, i) => (
-          <button key={s} onClick={() => setStep(i + 1)} style={S.stepBtn(step === i + 1)}>
-            {s}
-          </button>
-        ))}
-      </div>
+        {!loading && !productosError && monturas.length > 0 && step === 1 && <div className={styles.panel}>
+          <div className={styles.panelHeading}><span className={styles.panelIcon}><Glasses aria-hidden="true" /></span><div><h2>Montura y graduación</h2><p>Usa los valores de tu receta más reciente. Los campos en blanco se registran sin corrección.</p></div></div>
+          <div className={`${form.field} ${form.full}`}><label htmlFor="frame">Montura</label><select id="frame" value={montura} onChange={(event) => setMontura(event.target.value)}>{monturas.map((item) => <option key={item.id} value={item.id}>{item.nombre} — ${item.precio}</option>)}</select></div>
+          <div className={form.grid}><GraduationSelect id="od" label="Miopía / Hipermetropía OD" value={od} onChange={setOd} /><GraduationSelect id="oi" label="Miopía / Hipermetropía OI" value={oi} onChange={setOi} /><GraduationSelect id="ast-od" label="Astigmatismo OD" value={astOD} onChange={setAstOD} astigmatism /><GraduationSelect id="ast-oi" label="Astigmatismo OI" value={astOI} onChange={setAstOI} astigmatism /></div>
+          <div className={styles.panelActions}><button className={styles.secondaryButton} type="button" onClick={() => setMostrarCita(true)}><CalendarSearch size={17} /> No tengo receta</button><button className={styles.primaryButton} type="button" onClick={() => setStep(2)}>Continuar <ChevronRight size={17} /></button></div>
+        </div>}
 
-      {step === 1 && (
-        <div style={S.adaptBox}>
-          <div style={S.adaptTitle}>Elige tu montura</div>
-          <div style={S.adaptSub}>Selecciona la montura que deseas usar con tus lentes graduados.</div>
-          <div style={formGroupFull}>
-            <label style={label}>Montura</label>
-            <select style={select} value={montura} onChange={(e) => setMontura(e.target.value)}>
-              {monturas.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.nombre} — ${m.precio}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div style={{ ...S.adaptTitle, marginTop: 20 }}>Tu graduación</div>
-          <div style={S.adaptSub}>Ingresa los valores de tu última receta. Si no tienes astigmatismo, déjalo en blanco.</div>
-          <div style={S.formRow}>
-            <div style={S.formGroup}>
-              <label style={label}>Miopía / Hipermetropía OD</label>
-              <select style={select} value={od} onChange={(e) => setOd(e.target.value)}>
-                <option value="">Sin corrección</option>
-                {GRAD_STEPS.slice(1).map((g) => (
-                  <option key={`-${g}`} value={`-${g}`}>
-                    -{g}
-                  </option>
-                ))}
-                {GRAD_STEPS.slice(1).map((g) => (
-                  <option key={`+${g}`} value={`+${g}`}>
-                    +{g}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div style={S.formGroup}>
-              <label style={label}>Miopía / Hipermetropía OI</label>
-              <select style={select} value={oi} onChange={(e) => setOi(e.target.value)}>
-                <option value="">Sin corrección</option>
-                {GRAD_STEPS.slice(1).map((g) => (
-                  <option key={`-${g}`} value={`-${g}`}>
-                    -{g}
-                  </option>
-                ))}
-                {GRAD_STEPS.slice(1).map((g) => (
-                  <option key={`+${g}`} value={`+${g}`}>
-                    +{g}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div style={S.formRow}>
-            <div style={S.formGroup}>
-              <label style={label}>Astigmatismo OD (cilindro)</label>
-              <select style={select} value={astOD} onChange={(e) => setAstOD(e.target.value)}>
-                <option value="">Sin astigmatismo</option>
-                {GRAD_STEPS.slice(1).map((g) => (
-                  <option key={g} value={`-${g}`}>
-                    -{g}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div style={S.formGroup}>
-              <label style={label}>Astigmatismo OI (cilindro)</label>
-              <select style={select} value={astOI} onChange={(e) => setAstOI(e.target.value)}>
-                <option value="">Sin astigmatismo</option>
-                {GRAD_STEPS.slice(1).map((g) => (
-                  <option key={g} value={`-${g}`}>
-                    -{g}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div style={S.actionsRow}>
-            <button style={{ ...btnGhost, width: "auto" }} onClick={() => setMostrarAgendarCita(true)}>
-              📅 No tengo receta — solicitar examen
-            </button>
-            <button style={{ ...btnPrimary, width: "auto", padding: "10px 22px" }} onClick={() => setStep(2)}>
-              Continuar →
-            </button>
-          </div>
-        </div>
-      )}
+        {!loading && step === 2 && <div className={styles.panel}>
+          <div className={styles.panelHeading}><span className={styles.panelIcon}><Check aria-hidden="true" /></span><div><h2>Extras de lentes</h2><p>Selecciona únicamente los tratamientos que quieres incluir en la estimación.</p></div></div>
+          <div className={styles.extras}>{EXTRAS_LENTES.map((extra) => { const selected = extras.includes(extra.key); return <button key={extra.key} type="button" className={selected ? styles.extraSelected : ""} onClick={() => toggleExtra(extra.key)}>{selected ? <CheckCircle2 aria-hidden="true" /> : <Circle aria-hidden="true" />}<span><strong>{extra.label}</strong><small>{extra.desc}</small></span><b>+${extra.precio}</b></button>; })}</div>
+          <div className={styles.panelActions}><button className={styles.secondaryButton} type="button" onClick={() => setStep(1)}><ChevronLeft size={17} /> Atrás</button><button className={styles.primaryButton} type="button" onClick={() => setStep(3)}>Continuar <ChevronRight size={17} /></button></div>
+        </div>}
 
-      {step === 2 && (
-        <div style={S.adaptBox}>
-          <div style={S.adaptTitle}>Personaliza tus lentes</div>
-          <div style={S.adaptSub}>Agrega tratamientos opcionales a tu lente.</div>
-          <div style={grid(220)}>
-            {EXTRAS_LENTES.map((e) => (
-              <div key={e.key} style={S.extraCard(extras.includes(e.key))} onClick={() => toggleExtra(e.key)}>
-                <div style={S.extraHeader}>
-                  <div style={S.extraName}>{e.label}</div>
-                  <div style={{ fontSize: 18 }}>{extras.includes(e.key) ? "✅" : "⬜"}</div>
-                </div>
-                <div style={S.extraDesc}>{e.desc}</div>
-                <div style={S.extraPrice}>+${e.precio}</div>
-              </div>
-            ))}
-          </div>
-          <div style={S.actionsRowTop}>
-            <button style={{ ...btnGhost, width: "auto" }} onClick={() => setStep(1)}>
-              ← Atrás
-            </button>
-            <button style={{ ...btnPrimary, width: "auto", padding: "10px 22px" }} onClick={() => setStep(3)}>
-              Continuar →
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div style={S.adaptBox}>
-          <div style={S.adaptTitle}>Tu cotización</div>
-          <div style={S.adaptSub}>Revisa el resumen y elige dónde retirar.</div>
-          <div style={S.resumenBox}>
-            <div style={S.resumenGrid}>
-              <div>
-                <b>Montura:</b>
-              </div>
-              <div>{monObj?.nombre}</div>
-              <div>
-                <b>OD:</b>
-              </div>
-              <div>{od || "Sin corrección"}</div>
-              <div>
-                <b>OI:</b>
-              </div>
-              <div>{oi || "Sin corrección"}</div>
-              {astOD && (
-                <>
-                  <div>
-                    <b>Astig. OD:</b>
-                  </div>
-                  <div>{astOD}</div>
-                </>
-              )}
-              {astOI && (
-                <>
-                  <div>
-                    <b>Astig. OI:</b>
-                  </div>
-                  <div>{astOI}</div>
-                </>
-              )}
-              <div>
-                <b>Extras:</b>
-              </div>
-              <div>{extras.length ? extras.map((k) => EXTRAS_LENTES.find((e) => e.key === k)?.label).join(", ") : "Ninguno"}</div>
+        {!loading && step === 3 && <div className={styles.panel}>
+          <div className={styles.panelHeading}><span className={styles.panelIcon}><FileText aria-hidden="true" /></span><div><h2>Sede y cotización</h2><p>Revisa el resumen y registra tus datos antes de continuar por WhatsApp.</p></div></div>
+          <div className={styles.quoteLayout}>
+            <div className={styles.summary}><h3>Resumen</h3><dl><div><dt>Montura</dt><dd>{selectedFrame?.nombre}</dd></div><div><dt>OD</dt><dd>{od || "Sin corrección"}</dd></div><div><dt>OI</dt><dd>{oi || "Sin corrección"}</dd></div><div><dt>Extras</dt><dd>{extras.length ? extras.map((key) => EXTRAS_LENTES.find((extra) => extra.key === key)?.label).join(", ") : "Ninguno"}</dd></div></dl><div className={styles.total}><span>Montura ${selectedFrame?.precio} + lente base ${LENTE_BASE} + extras ${extrasTotal}</span><strong>${total}</strong><small>Total estimado</small></div></div>
+            <div className={styles.formSide}>
+              {error && <p className={form.error} role="alert">{error}</p>}
+              {confirmacion ? <div className={styles.confirmation}><CheckCircle2 aria-hidden="true" /><div><h3>Cotización registrada</h3><p>{confirmacion}</p></div></div> : <>
+                <p className={form.notice}>Pedimos nombre y teléfono para registrar la cotización antes de abrir WhatsApp.</p>
+                <div className={form.field}><label htmlFor="quote-name">Nombre</label><input id="quote-name" value={nombre} onChange={(event) => setNombre(event.target.value)} autoComplete="name" placeholder="Escribe tu nombre" /></div>
+                <div className={form.field}><label htmlFor="quote-phone">Teléfono</label><input id="quote-phone" value={telefono} onChange={(event) => setTelefono(event.target.value)} autoComplete="tel" inputMode="tel" placeholder="Número de contacto" /></div>
+                <div className={form.field}><label htmlFor="quote-location">Sede de entrega</label><select id="quote-location" value={sede} onChange={(event) => setSede(event.target.value)}><option value="">Selecciona una sede</option>{sedes.map((item) => <option key={item.id} value={item.ciudad}>{item.ciudad}</option>)}</select></div>
+                <OptionalGooglePrefill onName={setNombre} />
+                <button className={styles.registerButton} type="button" onClick={registerQuote} disabled={enviando}>{enviando ? "Registrando..." : <>Registrar cotización <ChevronRight size={17} /></>}</button>
+              </>}
             </div>
           </div>
-          <div style={S.cotizTotal}>
-            <div>
-              <div style={S.cotizBreakdown}>
-                Montura ${monObj?.precio} + lente base ${LENTE_BASE} + extras ${extrasTotal}
-              </div>
-              <div style={S.cotizLabel}>Total estimado</div>
-            </div>
-            <div style={S.cotizNum}>${total}</div>
-          </div>
-          {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-          {confirmacion && <p style={{ color: colors.blue700, fontSize: 13, marginBottom: 12 }}>{confirmacion}</p>}
-          {!confirmacion && (
-            <>
-            <div style={formGroupFull}>
-              <label style={label}>Tu nombre</label>
-              <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
-            </div>
-            <div style={formGroupFull}>
-              <label style={label}>Tu teléfono</label>
-              <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
-            </div>
-            <div style={formGroupFull}>
-              <label style={label}>Sede de entrega</label>
-              <select style={select} value={sede} onChange={(e) => setSede(e.target.value)}>
-                {sedes.map((s) => (
-                  <option key={s.id} value={s.ciudad}>
-                    {s.ciudad}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p style={{ color: colors.slate500, fontSize: 13, marginBottom: 12 }}>Primero registramos la cotización para seguimiento. Si la sede tiene WhatsApp configurado, se abrirá el chat con el resumen.</p>
-            <button style={btnWA} onClick={enviarWA} disabled={enviando}>
-              {enviando ? "Registrando…" : "Registrar cotización"}
-            </button>
-            </>
-          )}
-          <button style={{ ...btnGhost, marginTop: 10 }} onClick={() => setMostrarAgendarCita(true)} disabled={enviando}>
-            📅 Solicitar examen visual primero
-          </button>
-          <button style={{ ...btnGhost, marginTop: 8 }} onClick={() => setStep(2)} disabled={enviando}>
-            ← Atrás
-          </button>
-        </div>
-      )}
-
-      {mostrarAgendarCita && <AgendarCitaModal motivo="Examen de la vista" onClose={() => setMostrarAgendarCita(false)} onAgendada={citaAgendada} />}
-    </div>
+          <div className={styles.panelActions}><button className={styles.secondaryButton} type="button" onClick={() => setStep(2)} disabled={enviando}><ChevronLeft size={17} /> Atrás</button><button className={styles.secondaryButton} type="button" onClick={() => setMostrarCita(true)} disabled={enviando}><CalendarSearch size={17} /> Solicitar examen primero</button></div>
+        </div>}
+      </section>
+      {mostrarCita && <AgendarCitaModal motivo="Evaluación visual" onClose={() => setMostrarCita(false)} onAgendada={citaAgendada} />}
+    </main>
   );
 }

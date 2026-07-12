@@ -7,11 +7,11 @@ export type ProductoInput = Omit<Producto, "id">;
 export type CategoriaInput = Omit<Categoria, "id">;
 
 export const catalogoApi = {
-  crearProducto: (input: ProductoInput) => apiRequest<Producto>(BASE_URL, "/productos", { method: "POST", body: JSON.stringify(input) }),
-  actualizarProducto: (id: string, input: ProductoInput) => apiRequest<Producto>(BASE_URL, `/productos/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-  eliminarProducto: (id: string) => apiRequest<null>(BASE_URL, `/productos/${id}`, { method: "DELETE" }),
+  crearProducto: (input: ProductoInput) => apiRequest<Producto>(BASE_URL, "/productos", { method: "POST", body: JSON.stringify(input) }, true),
+  actualizarProducto: (id: string, input: ProductoInput) => apiRequest<Producto>(BASE_URL, `/productos/${id}`, { method: "PUT", body: JSON.stringify(input) }, true),
+  eliminarProducto: (id: string) => apiRequest<null>(BASE_URL, `/productos/${id}`, { method: "DELETE" }, true),
 
-  crearCategoria: (input: CategoriaInput) => apiRequest<Categoria>(BASE_URL, "/categorias", { method: "POST", body: JSON.stringify(input) }),
-  actualizarCategoria: (id: string, input: CategoriaInput) => apiRequest<Categoria>(BASE_URL, `/categorias/${id}`, { method: "PUT", body: JSON.stringify(input) }),
-  eliminarCategoria: (id: string) => apiRequest<null>(BASE_URL, `/categorias/${id}`, { method: "DELETE" }),
+  crearCategoria: (input: CategoriaInput) => apiRequest<Categoria>(BASE_URL, "/categorias", { method: "POST", body: JSON.stringify(input) }, true),
+  actualizarCategoria: (id: string, input: CategoriaInput) => apiRequest<Categoria>(BASE_URL, `/categorias/${id}`, { method: "PUT", body: JSON.stringify(input) }, true),
+  eliminarCategoria: (id: string) => apiRequest<null>(BASE_URL, `/categorias/${id}`, { method: "DELETE" }, true),
 };

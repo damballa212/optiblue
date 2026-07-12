@@ -1,7 +1,7 @@
 # OptiBlue Storefront Redesign - Design Specification
 
 Date: 2026-07-11
-Status: approved for implementation
+Status: implemented and verified locally
 Scope: combined UX/UI phases 2 and 3, including visual treatment of existing public conversion flows
 Linear: MAR-109, MAR-110
 
@@ -343,6 +343,16 @@ Implementation is complete only when:
 - Public initial route does not preload admin-exclusive code.
 
 `npm run lint` is not a valid gate until ESLint is installed and configured in the repository; this remains documented rather than reported as passing.
+
+Verified on 2026-07-11:
+
+- Vitest: 4 files, 12 tests covering filter logic, WhatsApp copy, map/contact availability, and missing/broken product image fallbacks.
+- Vite production build and `git diff --check` pass.
+- Firebase emulators confirmed reservation, quote, and appointment registration without mandatory login.
+- Playwright covered Home, Catalog, product detail, filter sheet, Lenses, Services, Locations, menu, reservation, quote, and appointment with no console errors or horizontal scrollers.
+- Home screenshots were inspected at 390, 768, 1024, and 1440px; Catalog and remaining public surfaces were inspected on mobile and desktop.
+- Empty catalog and empty category collections were exercised against Firestore Emulator, then the seed was restored.
+- Real client photography/catalog/location contacts remain external dependencies and were not fabricated.
 
 ## Out of Scope
 

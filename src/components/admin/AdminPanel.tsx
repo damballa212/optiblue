@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { auth } from "../../lib/auth/firebaseAuth";
 import * as S from "./Admin.styles";
 import { AdminDash } from "./AdminDash";
 import { AdminProductos } from "./AdminProductos";

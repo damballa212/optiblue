@@ -1,0 +1,68 @@
+.banner {
+  display: flex;
+  width: min(100% - 48px, 1240px);
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin: 0 auto 76px;
+  padding: 36px 40px;
+  background: var(--brand-pastel);
+}
+
+.banner span {
+  color: var(--brand-action);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.banner h2 {
+  margin: 8px 0 7px;
+  color: var(--brand-navy);
+  font-family: "Space Grotesk Variable", sans-serif;
+  font-size: 29px;
+  letter-spacing: 0;
+}
+
+.banner p {
+  max-width: 700px;
+  margin: 0;
+  color: #496579;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.banner a {
+  display: inline-flex;
+  min-height: 48px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+  padding: 0 16px;
+  border-radius: 3px;
+  background: var(--brand-action);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+@media (max-width: 767px) {
+  .banner {
+    display: block;
+    width: 100%;
+    margin-bottom: 0;
+    padding: 36px 20px;
+  }
+
+  .banner h2 {
+    font-size: 25px;
+  }
+
+  .banner a {
+    width: 100%;
+    justify-content: center;
+    margin-top: 20px;
+  }
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../lib/firestore";
 import type { Categoria } from "../types";
 
 export function useCategorias(): { categorias: Categoria[]; loading: boolean; error: string | null } {

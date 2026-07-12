@@ -1,0 +1,20 @@
+.clear,
+.apply {
+  min-height: 44px;
+  padding: 0 15px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.clear {
+  border: 1px solid var(--brand-navy);
+  background: var(--white);
+  color: var(--brand-navy);
+}
+
+.apply {
+  border: 1px solid var(--brand-action);
+  background: var(--brand-action);
+  color: var(--white);
+}

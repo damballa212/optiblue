@@ -1,0 +1,79 @@
+.filters fieldset {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.filters fieldset:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.filters legend {
+  margin-bottom: 12px;
+  color: var(--brand-navy);
+  font-family: "Space Grotesk Variable", sans-serif;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.filters > fieldset > label {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 9px;
+  color: #425a6e;
+  font-size: 13px;
+}
+
+.filters input[type="radio"],
+.filters input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--brand-navy);
+}
+
+.priceInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.priceInputs label span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.priceInputs input {
+  width: 100%;
+  height: 38px;
+  padding: 0 8px;
+  border: 1px solid #9fb1bc;
+  border-radius: 3px;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.rangeTrack {
+  position: relative;
+  height: 3px;
+  margin: 11px 3px 0;
+  background: #bdcbd3;
+}
+
+.rangeTrack span {
+  position: absolute;
+  height: 3px;
+  background: var(--brand-action);
+}
+
+.compact fieldset {
+  padding: 15px 0;
+}

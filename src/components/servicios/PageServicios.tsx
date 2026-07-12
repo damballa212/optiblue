@@ -1,11 +1,13 @@
+import { ArrowRight, CalendarCheck, FileText, ScanEye } from "lucide-react";
 import { useState } from "react";
-import type { Servicio } from "../../types";
 import { SERVICIOS } from "../../data";
 import { useSedes } from "../../hooks/useSedes";
-import { openWA, getSedeWhatsapp } from "../../lib/whatsapp";
+import { getSedeWhatsapp, openWA } from "../../lib/whatsapp";
+import type { Servicio } from "../../types";
 import { AgendarCitaModal, type CitaAgendada } from "../shared/AgendarCitaModal";
-import { section, sectionTag, sectionH2, sectionSub, grid, btnPrimary } from "../../styles/shared";
-import * as S from "./PageServicios.styles";
+import styles from "./PageServicios.module.css";
+
+const ICONS = [ScanEye, FileText, CalendarCheck];
 
 export function PageServicios() {
   const { sedes } = useSedes();
@@ -17,26 +19,19 @@ export function PageServicios() {
   }
 
   return (
-    <div style={section}>
-      <div style={sectionTag}>Oftalmología</div>
-      <h2 style={sectionH2}>Servicios especializados</h2>
-      <p style={sectionSub}>Atención oftalmológica con tecnología de vanguardia y profesionales certificados.</p>
-      <div style={grid(240)}>
-        {SERVICIOS.map((s) => (
-          <div key={s.nombre} style={S.servCard}>
-            <div style={S.servIcon}>{s.icon}</div>
-            <div style={S.servName}>{s.nombre}</div>
-            <div style={S.servDesc}>{s.desc}</div>
-            <div style={S.servPrice}>{s.precio}</div>
-            <button style={{ ...btnPrimary, marginTop: 12 }} onClick={() => setServicioAAgendar(s)}>
-              📅 Solicitar cita
-            </button>
-          </div>
-        ))}
-      </div>
-      {servicioAAgendar && (
-        <AgendarCitaModal motivo={servicioAAgendar.nombre} onClose={() => setServicioAAgendar(null)} onAgendada={(info) => citaAgendada(servicioAAgendar, info)} />
-      )}
-    </div>
+    <main className={styles.page}>
+      <header className={styles.hero}><span>Servicios visuales</span><h1>Atención según lo que necesitas.</h1><p>Consulta información, registra una cotización o solicita una fecha preferida en una sede OptiBlue.</p></header>
+      <section className={styles.services}>
+        <div className={styles.heading}><span>Opciones disponibles</span><h2>Elige el siguiente paso.</h2></div>
+        <div className={styles.grid}>
+          {SERVICIOS.map((service, index) => {
+            const Icon = ICONS[index] ?? ScanEye;
+            return <article key={service.nombre}><span className={styles.icon}><Icon aria-hidden="true" /></span><h3>{service.nombre}</h3><p>{service.desc}</p><button type="button" onClick={() => setServicioAAgendar(service)}>Solicitar atención <ArrowRight size={17} aria-hidden="true" /></button></article>;
+          })}
+        </div>
+        <aside className={styles.note}><CalendarCheck aria-hidden="true" /><div><h2>La solicitud no confirma un turno automático.</h2><p>Indicas fecha y hora preferidas; la sede coordina disponibilidad después de registrar tus datos.</p></div></aside>
+      </section>
+      {servicioAAgendar && <AgendarCitaModal motivo={servicioAAgendar.nombre} onClose={() => setServicioAAgendar(null)} onAgendada={(info) => citaAgendada(servicioAAgendar, info)} />}
+    </main>
   );
 }

@@ -27,7 +27,7 @@ export function buildWAMessage(payload: WAMessagePayload): string {
       );
     case "cita":
       return encodeURIComponent(
-        `Hola OptiBlue! Quisiera agendar una cita para examen de la vista.\n*Sede:* ${payload.sede}\n*Montura de interés:* ${payload.montura}`,
+        `Hola OptiBlue! Quisiera solicitar una cita para examen de la vista.\n*Sede:* ${payload.sede}${payload.montura ? `\n*Montura de interés:* ${payload.montura}` : ""}`,
       );
   }
 }

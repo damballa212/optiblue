@@ -1,0 +1,112 @@
+.section {
+  width: min(100% - 48px, 1240px);
+  margin: 0 auto;
+  padding: 76px 0;
+}
+
+.heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 26px;
+}
+
+.heading span,
+.cityLabel {
+  color: var(--brand-action);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.heading h2 {
+  margin: 7px 0 0;
+  color: var(--brand-navy);
+  font-family: "Space Grotesk Variable", sans-serif;
+  font-size: 34px;
+  letter-spacing: 0;
+}
+
+.heading > a,
+.grid article > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand-navy);
+  font-size: 13px;
+  font-weight: 750;
+  text-underline-offset: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.grid article {
+  min-height: 250px;
+  padding: 24px;
+  border-top: 5px solid var(--brand-sky);
+  background: var(--white);
+}
+
+.grid h3 {
+  margin: 12px 0 32px;
+  color: var(--brand-navy);
+  font-family: "Space Grotesk Variable", sans-serif;
+  font-size: 27px;
+}
+
+.grid article > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 9px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.grid article > div svg {
+  color: var(--brand-sky);
+}
+
+.grid article > a {
+  margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .section {
+    width: min(100% - 32px, 1240px);
+    padding: 52px 0;
+  }
+
+  .heading {
+    display: block;
+  }
+
+  .heading h2 {
+    font-size: 27px;
+  }
+
+  .heading > a {
+    margin-top: 14px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid article {
+    min-width: 0;
+  }
+}

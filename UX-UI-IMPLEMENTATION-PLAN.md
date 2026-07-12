@@ -160,10 +160,10 @@ Issues creados para esta implementacion:
 |---|---|---|---|---|
 | 0 | [MAR-107](https://linear.app/marlondev/issue/MAR-107/storefront-publico-corregir-confianza-basica-nav-mobile-y-estados) | Done | High | ninguna |
 | 1 | [MAR-108](https://linear.app/marlondev/issue/MAR-108/storefront-publico-preparar-datos-assets-y-contenido-real-para) | In Progress | High | MAR-103, MAR-104 |
-| 2 | [MAR-109](https://linear.app/marlondev/issue/MAR-109/storefront-publico-redisenar-home-y-sistema-visual-comercialsocial) | Backlog | High | MAR-107 |
-| 3 | [MAR-110](https://linear.app/marlondev/issue/MAR-110/catalogo-publico-filtros-profesionales-detalle-de-producto-y-cards) | Backlog | High | MAR-103, MAR-107 |
+| 2 | [MAR-109](https://linear.app/marlondev/issue/MAR-109/storefront-publico-redisenar-home-y-sistema-visual-comercialsocial) | Done | High | MAR-107 |
+| 3 | [MAR-110](https://linear.app/marlondev/issue/MAR-110/catalogo-publico-filtros-profesionales-detalle-de-producto-y-cards) | Done | High | MAR-103, MAR-107 |
 | 4 | [MAR-111](https://linear.app/marlondev/issue/MAR-111/flujos-publicos-reducir-friccion-de-reserva-cotizacion-y-citas) | Done | High | MAR-107 |
-| 5 | [MAR-112](https://linear.app/marlondev/issue/MAR-112/storefront-publico-performance-seo-basico-y-documentacion-post) | Backlog | Medium | MAR-107 |
+| 5 | [MAR-112](https://linear.app/marlondev/issue/MAR-112/storefront-publico-performance-seo-basico-y-documentacion-post) | Done | Medium | MAR-107 |
 
 ## Dependencias practicas
 
@@ -275,41 +275,43 @@ Linear: [MAR-109](https://linear.app/marlondev/issue/MAR-109/storefront-publico-
 
 Objetivo: reemplazar la apariencia generica por una primera impresion profesional, local, comercial y confiable, alineada con el Instagram real de OptiBlue.
 
+Estado 2026-07-11: implementada y verificada contra los mockups aprobados. Se usa un fallback geometrico optico honesto porque todavia no existen fotos reales en el repo; sustituirlo por fotografia aprobada sigue bloqueado por MAR-108. Cashea y promociones se evaluaron y se omitieron porque no hay vigencia confirmada.
+
 Checklist:
 
-- [ ] Definir moodboard/direccion visual basada en Instagram + benchmarks, no en templates.
-- [ ] Definir paleta final basada en navy, azul pastel, blanco, azul electrico y celeste del logo.
-- [ ] Definir tipografia de headings y body.
-- [ ] Definir escala tipografica.
-- [ ] Definir spacing/breakpoints.
-- [ ] Definir tratamiento de botones, inputs, cards y modales.
-- [ ] Redisenar hero.
-- [ ] Hero usa asset real/profesional o fallback honesto.
-- [ ] Hero tiene una propuesta concreta, no copy generico.
-- [ ] Hero o primer scroll muestra rostro humano, producto real, tienda o personal clinico.
-- [ ] Agregar bloque de confianza.
-- [ ] Agregar bloque Cashea si esta confirmado.
-- [ ] Agregar bloque Promos si hay promociones vigentes reales.
-- [ ] Agregar bloque de servicios con jerarquia clara.
-- [ ] Agregar bloque de sedes con senal local.
-- [ ] Agregar bloque de asesoria si el usuario no sabe que elegir.
-- [ ] Eliminar emojis como iconografia principal.
-- [ ] Revisar footer para que parezca institucional, no template.
-- [ ] Verificar responsive en desktop/tablet/mobile.
+- [x] Definir moodboard/direccion visual basada en Instagram + benchmarks, no en templates.
+- [x] Definir paleta final basada en navy, azul pastel, blanco, azul electrico y celeste del logo.
+- [x] Definir tipografia de headings y body: Space Grotesk Variable + DM Sans Variable, servidas localmente.
+- [x] Definir escala tipografica.
+- [x] Definir spacing/breakpoints.
+- [x] Definir tratamiento de botones, inputs, cards y modales.
+- [x] Redisenar hero.
+- [x] Hero usa fallback optico profesional y honesto.
+- [x] Hero tiene una propuesta concreta, no copy generico.
+- [ ] Reemplazar fallback por rostro/producto/tienda/personal real: bloqueado por falta de assets reales en MAR-108; no se uso stock.
+- [x] Agregar bloque de confianza basado en proceso verificable, sin claims numericos.
+- [x] Evaluar Cashea: omitido porque no esta confirmado como vigente.
+- [x] Evaluar promociones: omitidas porque no hay promociones vigentes confirmadas.
+- [x] Agregar bloque de servicios con jerarquia clara.
+- [x] Agregar bloque de sedes con senal local.
+- [x] Agregar bloque de asesoria si el usuario no sabe que elegir.
+- [x] Eliminar emojis del storefront publico y usar Lucide/fallbacks opticos.
+- [x] Revisar footer para que parezca institucional, no template.
+- [x] Verificar responsive en desktop/tablet/mobile.
 
 Criterios de aceptacion:
 
-- [ ] El primer viewport muestra una optica real o una direccion visual profesional conectada al Instagram.
-- [ ] La paleta se reconoce como OptiBlue: navy + azul pastel + blanco bold + acentos azul electrico/celeste.
-- [ ] No domina un gradiente azul generico.
-- [ ] La home comunica valor, confianza y proximo paso.
-- [ ] No hay solapes ni texto cortado en mobile.
+- [x] El primer viewport muestra una direccion visual profesional conectada al Instagram sin inventar fotografia.
+- [x] La paleta se reconoce como OptiBlue: navy + azul pastel + blanco bold + acentos azul electrico/celeste.
+- [x] No domina un gradiente azul generico.
+- [x] La home comunica opciones, sedes y proximo paso con datos V1.
+- [x] No hay solapes, texto cortado ni scroll horizontal en mobile.
 
 Verificacion:
 
-- [ ] `npm run build`.
-- [ ] Capturas `/` en 1440px, 1024px y 390px.
-- [ ] Revisión visual contra `UX-UI-AUDIT-RESEARCH.md`.
+- [x] `npm run build`.
+- [x] Capturas `/` en 1440px, 1024px, 768px y 390px.
+- [x] Revision visual manual contra los tres mockups aprobados y `UX-UI-AUDIT-RESEARCH.md`.
 
 ## Fase 3 - Catalogo profesional
 
@@ -317,43 +319,45 @@ Linear: [MAR-110](https://linear.app/marlondev/issue/MAR-110/catalogo-publico-fi
 
 Objetivo: que el catalogo ayude a elegir lentes, no solo listar productos.
 
+Estado 2026-07-11: implementada y verificada con el seed V1 del emulador. MAR-103 sigue pendiente para sustituir el seed por catalogo real, pero no bloquea la estructura terminada. Se probaron `imagenUrl` nula y fallida; ambas muestran fallback profesional.
+
 Checklist:
 
-- [ ] Esperar/validar estructura de MAR-103 o crear seed representativo temporal con los campos V1.
-- [ ] No mostrar marcas vistas en Instagram como dato de producto salvo nueva ampliacion de modelo o copy estatico verificado fuera de cards.
-- [ ] Definir atributos filtrables reales dentro del modelo V1.
-- [ ] Redisenar barra de filtros.
-- [ ] Agregar filtros por categoria.
-- [ ] Agregar filtros por precio si aplica.
-- [ ] Agregar filtro por destacado/stock si aporta valor.
-- [ ] No agregar filtros por color/material/forma/marca en V1: esos campos no existen en backend.
-- [ ] Redisenar product card.
-- [ ] Card muestra foto real o fallback profesional.
-- [ ] Card muestra precio de forma clara.
-- [ ] Card muestra solo atributos reales V1: nombre, categoria, precio, descripcion corta, stock/destacado si aplica.
-- [ ] Card muestra disponibilidad/stock si aplica.
-- [ ] Crear detalle de producto o modal de producto.
-- [ ] Detalle muestra solo campos V1: imagenUrl, nombre, categoria, descripcion, precio, stock, destacado.
-- [ ] CTA diferencia:
-  - [ ] consultar disponibilidad
-  - [ ] apartar en sede
-  - [ ] cotizar con formula
-- [ ] Empty state ofrece accion: WhatsApp/asesoria/sedes.
+- [x] Validar estructura de MAR-103 y usar seed representativo temporal con los campos V1.
+- [x] No mostrar marcas vistas en Instagram como dato de producto.
+- [x] Definir atributos filtrables reales dentro del modelo V1.
+- [x] Redisenar barra de filtros desktop y sheet mobile.
+- [x] Agregar filtros por categoria.
+- [x] Agregar filtros por precio.
+- [x] Agregar filtros por destacado y stock.
+- [x] No agregar filtros por color/material/forma/marca en V1.
+- [x] Redisenar product card.
+- [x] Card muestra `imagenUrl` o fallback profesional cuando falta/falla.
+- [x] Card muestra precio de forma clara.
+- [x] Card muestra solo atributos reales V1: nombre, categoria, precio, descripcion corta, stock/destacado.
+- [x] Card muestra stock general sin prometer disponibilidad por sede.
+- [x] Crear detalle modal con ruta `/catalogo/:productoId`.
+- [x] Detalle muestra solo campos V1: imagenUrl, nombre, categoria, descripcion, precio, stock, destacado.
+- [x] CTA diferencia:
+  - [x] consultar disponibilidad
+  - [x] apartar en sede
+  - [x] cotizar con formula
+- [x] Empty state ofrece accion a sedes/asesoria.
 
 Criterios de aceptacion:
 
-- [ ] El usuario entiende que producto esta viendo y que hacer despues.
-- [ ] No se renderiza emoji como producto.
-- [ ] Los filtros no inventan atributos inexistentes.
-- [ ] No se agregan campos nuevos al modelo solo para sostener la UI.
-- [ ] Mobile permite filtrar sin romper layout.
+- [x] El usuario entiende que producto esta viendo y que hacer despues.
+- [x] No se renderiza emoji como producto.
+- [x] Los filtros no inventan atributos inexistentes.
+- [x] No se agregan campos nuevos al modelo solo para sostener la UI.
+- [x] Mobile permite filtrar sin romper layout.
 
 Verificacion:
 
-- [ ] `npm run build`.
-- [ ] Capturas `/catalogo` desktop/mobile.
-- [ ] Probar producto con imagen y sin imagen.
-- [ ] Probar categorias vacias.
+- [x] `npm run build`.
+- [x] Capturas `/catalogo` desktop/mobile, filtros mobile y detalle mobile.
+- [x] Probar `ProductImage` con URL, URL fallida y sin URL mediante Vitest.
+- [x] Probar categorias vacias y catalogo vacio contra Firestore emulator; seed restaurado al terminar.
 
 ## Fase 4 - Conversion: reserva, cotizacion y citas
 
@@ -402,59 +406,61 @@ Linear: [MAR-112](https://linear.app/marlondev/issue/MAR-112/storefront-publico-
 
 Objetivo: cerrar el rediseño con carga razonable, metadata y documentacion real.
 
+Estado 2026-07-11: implementada y verificada en build/preview local. Admin, Auth y paginas publicas se separaron por carga diferida; Firestore se mantiene en el storefront porque home, catalogo, sedes y footer consumen lecturas reales. La entrada monolitica de `845.88 kB` se reemplazo por chunks menores; el mayor es `231.42 kB` y el build ya no genera warning de 500 kB. LocalBusiness/Optician se difiere hasta completar MAR-104 y Product hasta completar MAR-103. No hay decisiones visuales finales que documentar hasta ejecutar la fase 2.
+
 Checklist:
 
-- [ ] Revisar bundle generado por `npm run build`.
-- [ ] Separar admin con lazy loading/code splitting si aplica.
-- [ ] Separar rutas pesadas si aplica.
-- [ ] Revisar carga de Firebase/Auth en storefront publico.
-- [ ] Agregar lazy loading de imagenes.
-- [ ] Agregar dimensiones/ratio estables para imagenes.
-- [ ] Revisar `index.html` metadata.
-- [ ] Definir title/description del sitio.
-- [ ] Evaluar structured data LocalBusiness/Optician.
-- [ ] Evaluar structured data Product solo cuando MAR-103 este completo.
-- [ ] Actualizar `README.md`.
-- [ ] README debe reflejar:
-  - [ ] Firebase real
-  - [ ] Auth real
-  - [ ] Router real
-  - [ ] Produccion
-  - [ ] Pendientes reales MAR-103/MAR-104
-  - [ ] Como correr build/preview
-- [ ] Documentar decisiones visuales finales.
+- [x] Revisar bundle generado por `npm run build`.
+- [x] Separar admin con lazy loading/code splitting si aplica.
+- [x] Separar rutas pesadas si aplica.
+- [x] Revisar carga de Firebase/Auth en storefront publico.
+- [x] Agregar lazy loading de imagenes.
+- [x] Agregar dimensiones/ratio estables para imagenes.
+- [x] Revisar `index.html` metadata.
+- [x] Definir title/description del sitio.
+- [x] Evaluar structured data LocalBusiness/Optician: diferido hasta completar datos reales de sedes en MAR-104.
+- [x] Evaluar structured data Product: diferido hasta completar catalogo real en MAR-103.
+- [x] Actualizar `README.md`.
+- [x] README debe reflejar:
+  - [x] Firebase real
+  - [x] Auth real
+  - [x] Router real
+  - [x] Produccion
+  - [x] Pendientes reales MAR-103/MAR-104
+  - [x] Como correr build/preview
+- [x] Documentar decisiones visuales finales en `docs/superpowers/specs/2026-07-11-optiblue-storefront-redesign-design.md`.
 
 Criterios de aceptacion:
 
-- [ ] `npm run build` pasa.
-- [ ] No quedan warnings criticos sin explicacion.
-- [ ] README no contradice el codigo ni Obsidian.
-- [ ] El storefront no carga innecesariamente todo el admin en la primera pantalla si se puede evitar.
+- [x] `npm run build` pasa.
+- [x] No quedan warnings criticos sin explicacion.
+- [x] README no contradice el codigo ni Obsidian.
+- [x] El storefront no carga innecesariamente todo el admin en la primera pantalla si se puede evitar.
 
 Verificacion:
 
-- [ ] Build local.
-- [ ] Preview local.
-- [ ] Smoke test en rutas publicas.
-- [ ] Revisar git diff antes de PR.
+- [x] Build local.
+- [x] Preview local.
+- [x] Smoke test en rutas publicas y `/admin/login` a 390x844.
+- [x] Revisar git diff antes de PR.
 
 ## Checklist maestro
 
-- [ ] MAR-107 cerrado.
+- [x] MAR-107 cerrado.
 - [ ] MAR-108 cerrado o bloqueos externos documentados.
-- [ ] MAR-109 cerrado.
-- [ ] MAR-110 cerrado o bloqueado por MAR-103 con razon explicita.
-- [ ] MAR-111 cerrado.
-- [ ] MAR-112 cerrado.
-- [ ] Obsidian actualizado con decisiones durables.
-- [ ] Daily actualizada al cerrar la sesion de implementacion.
-- [ ] PR creado contra el flujo correcto del repo frontend.
+- [x] MAR-109 cerrado.
+- [x] MAR-110 cerrado; MAR-103 queda como sustitucion de seed por catalogo real, no como bloqueo de UI.
+- [x] MAR-111 cerrado.
+- [x] MAR-112 cerrado.
+- [x] Obsidian actualizado con decisiones durables.
+- [x] Daily actualizada al cerrar la sesion de implementacion.
+- [ ] Commit/PR no solicitado en esta sesion; el worktree se entrega verificado sin publicar.
 
 ## No hacer sin nueva decision
 
-- [ ] No clonar template de GitHub como base visual.
-- [ ] No inventar productos, sedes, marcas o ratings.
-- [ ] No agregar pasarela de pago.
-- [ ] No construir virtual try-on.
-- [ ] No redisenar admin completo dentro de esta fase.
-- [ ] No mover issues a Done con AC sin marcar/verificar.
+- [x] No clonar template de GitHub como base visual.
+- [x] No inventar productos, sedes, marcas o ratings.
+- [x] No agregar pasarela de pago.
+- [x] No construir virtual try-on.
+- [x] No redisenar admin completo dentro de esta fase.
+- [x] No mover issues a Done con AC sin marcar/verificar.

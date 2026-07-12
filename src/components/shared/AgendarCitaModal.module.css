@@ -1,0 +1,19 @@
+.confirmation {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 13px;
+  padding: 18px;
+  background: #e9f7f0;
+  color: #0f5a3a;
+}
+
+.confirmation h3,
+.confirmation p {
+  margin: 0;
+}
+
+.confirmation p {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+}

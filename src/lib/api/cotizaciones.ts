@@ -8,6 +8,6 @@ export type CotizacionInput = Omit<Cotizacion, "id" | "estado">;
 export const cotizacionesApi = {
   crearCotizacion: (input: CotizacionInput) => apiRequest<Cotizacion>(BASE_URL, "/cotizaciones", { method: "POST", body: JSON.stringify(input) }),
   // Back office: requiere sesión admin.
-  listarCotizaciones: () => apiRequest<Cotizacion[]>(BASE_URL, "/cotizaciones"),
-  actualizarEstadoCotizacion: (id: string, estado: EstadoCotizacion) => apiRequest<Cotizacion>(BASE_URL, `/cotizaciones/${id}`, { method: "PATCH", body: JSON.stringify({ estado }) }),
+  listarCotizaciones: () => apiRequest<Cotizacion[]>(BASE_URL, "/cotizaciones", undefined, true),
+  actualizarEstadoCotizacion: (id: string, estado: EstadoCotizacion) => apiRequest<Cotizacion>(BASE_URL, `/cotizaciones/${id}`, { method: "PATCH", body: JSON.stringify({ estado }) }, true),
 };

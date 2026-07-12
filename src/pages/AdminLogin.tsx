@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { auth } from "../lib/auth/firebaseAuth";
 import { useAuth } from "../lib/auth/AuthContext";
 import * as S from "./AdminLogin.styles";
 

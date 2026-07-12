@@ -1,0 +1,55 @@
+.fallback {
+  position: relative;
+  width: 150px;
+  height: 70px;
+}
+
+.lens,
+.bridge,
+.armLeft,
+.armRight {
+  position: absolute;
+  display: block;
+  background: var(--brand-navy);
+}
+
+.lens {
+  top: 10px;
+  width: 62px;
+  height: 48px;
+  border: 8px solid var(--brand-navy);
+  border-radius: 24px 24px 28px 28px;
+  background: rgba(84, 191, 232, 0.18);
+}
+
+.lens:first-child {
+  left: 6px;
+}
+
+.lens:nth-child(2) {
+  right: 6px;
+}
+
+.bridge {
+  top: 28px;
+  left: 64px;
+  width: 22px;
+  height: 7px;
+}
+
+.armLeft,
+.armRight {
+  top: 20px;
+  width: 22px;
+  height: 6px;
+}
+
+.armLeft {
+  left: -10px;
+  transform: rotate(12deg);
+}
+
+.armRight {
+  right: -10px;
+  transform: rotate(-12deg);
+}

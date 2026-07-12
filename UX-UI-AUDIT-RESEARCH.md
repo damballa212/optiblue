@@ -2,7 +2,9 @@
 
 Fecha: 2026-07-11  
 Alcance: frontend publico del repo `/Users/marlon/Documents/trae_projects/optiblue/optiblue-web`  
-Estado: investigacion solamente. No se modifico UI, codigo, datos ni Linear.
+Estado: auditoria baseline conservada como evidencia. Sus fases publicas 1-5 fueron implementadas el 2026-07-11; el estado vigente y los bloqueos externos estan en `UX-UI-IMPLEMENTATION-PLAN.md`.
+
+> Nota de lectura: las referencias a "UI actual" describen la version auditada antes del rediseño, no el storefront implementado despues. Se conservan para explicar por que se tomaron las decisiones.
 
 ## Resumen ejecutivo
 

@@ -1,17 +1,13 @@
-import { auth } from "../firebase";
-
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
 }
 
-// Adjunta el ID token de Firebase Auth cuando hay sesión — las operaciones
-// admin lo exigen (backend: core/auth.ts requireAdmin); las públicas
-// (crear pedido/cita/cotización) lo ignoran si viene, así que es seguro
-// llamarlo siempre desde el mismo helper.
-export async function apiRequest<T>(baseUrl: string, path: string, options?: RequestInit): Promise<T> {
-  const token = await auth.currentUser?.getIdToken();
+export async function apiRequest<T>(baseUrl: string, path: string, options?: RequestInit, authenticated = false): Promise<T> {
+  const token = authenticated
+    ? await import("../auth/firebaseAuth").then(({ auth }) => auth.currentUser?.getIdToken())
+    : undefined;
   const res = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers: {

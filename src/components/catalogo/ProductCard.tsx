@@ -1,27 +1,35 @@
+import { ArrowUpRight, PackageCheck, Star } from "lucide-react";
 import type { Producto } from "../../types";
-import { card, btnPrimary } from "../../styles/shared";
-import * as S from "./ProductCard.styles";
+import { ProductImage } from "./ProductImage";
+import styles from "./ProductCard.module.css";
 
 interface ProductCardProps {
   p: Producto;
   categoriaLabel: string;
-  onReservar: (producto: Producto) => void;
+  onView: (producto: Producto) => void;
 }
 
-export function ProductCard({ p, categoriaLabel, onReservar }: ProductCardProps) {
+export function ProductCard({ p, categoriaLabel, onView }: ProductCardProps) {
   return (
-    <div style={card}>
-      {p.imagenUrl ? <img src={p.imagenUrl} alt={p.nombre} style={S.cardImgReal} /> : <div style={S.cardImg}>👓</div>}
-      <div style={S.cardBody}>
-        <div style={S.cardCat}>{categoriaLabel}</div>
-        <div style={S.cardName}>{p.nombre}</div>
-        <div style={S.cardDesc}>{p.descripcion}</div>
-        <div style={S.cardPrice}>${p.precio}</div>
-        <button style={btnPrimary} onClick={() => onReservar(p)}>
-          📅 Reservar
-        </button>
-        <div style={S.cardFootnote}>Te redirigimos a WhatsApp</div>
+    <article className={styles.card}>
+      <div className={styles.media}>
+        {p.destacado && <span className={styles.featured}><Star size={13} aria-hidden="true" /> Destacado</span>}
+        <ProductImage src={p.imagenUrl} alt={p.nombre} width={600} height={420} loading="lazy" />
       </div>
-    </div>
+      <div className={styles.body}>
+        <span className={styles.category}>{categoriaLabel}</span>
+        <h3>{p.nombre}</h3>
+        <p>{p.descripcion}</p>
+        <div className={styles.meta}>
+          <strong>${p.precio}</strong>
+          <span className={p.stock > 0 ? styles.inStock : styles.outOfStock}>
+            <PackageCheck size={14} aria-hidden="true" /> {p.stock > 0 ? "Con stock" : "Sin stock"}
+          </span>
+        </div>
+        <button type="button" onClick={() => onView(p)}>
+          Ver producto <ArrowUpRight size={17} aria-hidden="true" />
+        </button>
+      </div>
+    </article>
   );
 }

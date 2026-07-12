@@ -130,7 +130,7 @@ export function AdminProductos() {
           {productos.map((p) => (
             <tr key={p.id}>
               <td style={td}>
-                {p.imagenUrl ? <img src={p.imagenUrl} alt={p.nombre} style={S.thumbImg} /> : <span style={S.productCell}>👓</span>}
+                {p.imagenUrl ? <img src={p.imagenUrl} alt={p.nombre} width="96" height="72" loading="lazy" decoding="async" style={S.thumbImg} /> : <span style={S.productCell}>👓</span>}
                 {p.nombre}
               </td>
               <td style={td}>

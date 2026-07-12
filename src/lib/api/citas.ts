@@ -8,6 +8,6 @@ export type CitaInput = Omit<Cita, "id" | "estado" | "nota">;
 export const citasApi = {
   crearCita: (input: CitaInput) => apiRequest<Cita>(BASE_URL, "/citas", { method: "POST", body: JSON.stringify(input) }),
   // Back office: requiere sesión admin.
-  listarCitas: () => apiRequest<Cita[]>(BASE_URL, "/citas"),
-  actualizarEstadoCita: (id: string, estado: EstadoCita) => apiRequest<Cita>(BASE_URL, `/citas/${id}`, { method: "PATCH", body: JSON.stringify({ estado }) }),
+  listarCitas: () => apiRequest<Cita[]>(BASE_URL, "/citas", undefined, true),
+  actualizarEstadoCita: (id: string, estado: EstadoCita) => apiRequest<Cita>(BASE_URL, `/citas/${id}`, { method: "PATCH", body: JSON.stringify({ estado }) }, true),
 };

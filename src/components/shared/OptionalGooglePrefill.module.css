@@ -1,0 +1,42 @@
+.wrap {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  text-align: center;
+}
+
+.wrap button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #a4b6c1;
+  border-radius: 3px;
+  background: var(--white);
+  color: var(--brand-navy);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.wrap button:hover {
+  border-color: var(--brand-action);
+  box-shadow: 0 3px 0 rgba(0, 45, 99, 0.11);
+}
+
+.wrap button:disabled {
+  cursor: wait;
+}
+
+.wrap span,
+.wrap p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.wrap p {
+  color: var(--danger);
+}

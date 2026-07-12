@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "./firebaseAuth";
 
 interface AuthState {
   user: User | null;
@@ -10,11 +10,8 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState>({ user: null, isAdmin: false, loading: true });
 
-// Un solo Firebase Auth para todo el sitio — clientes (Google) y admin
-// (correo/contraseña) comparten la misma instancia. Lo que los separa es
-// autorización, no infraestructura: `isAdmin` depende del custom claim
-// `admin:true`, asignado a mano (ver backend scripts/set-admin-claim.ts),
-// nunca autoasignable por el usuario.
+// El panel exige el custom claim `admin:true`, asignado únicamente desde
+// backend. Este provider vive dentro del chunk administrativo.
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, isAdmin: false, loading: true });
 
