@@ -6,8 +6,8 @@ import { useSedes } from "../../hooks/useSedes";
 import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
 import { cotizacionesApi } from "../../lib/api/cotizaciones";
 import { AgendarCitaModal } from "../shared/AgendarCitaModal";
-import { GoogleAuthGate } from "../shared/GoogleAuthGate";
 import { section, sectionTag, sectionH2, sectionSub, grid, formGroupFull, label, input, select, btnPrimary, btnGhost, btnWA } from "../../styles/shared";
+import { colors } from "../../styles/tokens";
 import * as S from "./PageLentes.styles";
 
 const GRAD_STEPS = ["", "0.25", "0.50", "0.75", "1.00", "1.25", "1.50", "1.75", "2.00", "2.25", "2.50", "2.75", "3.00", "3.50", "4.00", "4.50", "5.00", "5.50", "6.00"];
@@ -40,6 +40,7 @@ export function PageLentes() {
   const [telefono, setTelefono] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmacion, setConfirmacion] = useState<string | null>(null);
   const [mostrarAgendarCita, setMostrarAgendarCita] = useState(false);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export function PageLentes() {
 
     setEnviando(true);
     setError(null);
+    setConfirmacion(null);
     try {
       // La cotización (con la fórmula óptica completa) se registra en
       // Firestore ANTES de abrir WhatsApp — nunca vive en el producto
@@ -86,7 +88,12 @@ export function PageLentes() {
       });
       const extrasLabels = extras.map((k) => EXTRAS_LENTES.find((e) => e.key === k)?.label ?? k);
       const msg = buildWAMessage({ tipo: "cotizacion", montura: monObj.nombre, od, oi, astOD, astOI, extras: extrasLabels, total, sede });
-      openWA(msg, getSedeWhatsapp(sedes, sede));
+      const whatsappAbierto = openWA(msg, getSedeWhatsapp(sedes, sede));
+      setConfirmacion(
+        whatsappAbierto
+          ? "Cotización registrada. Se abrió WhatsApp para continuar con la sede."
+          : "Cotización registrada. Esta sede todavía no tiene WhatsApp real configurado; el equipo debe contactarte con el teléfono que dejaste.",
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo registrar tu cotización. Intenta de nuevo.");
     } finally {
@@ -96,7 +103,7 @@ export function PageLentes() {
 
   function citaAgendada(info: { sede: string }) {
     const msg = buildWAMessage({ tipo: "cita", sede: info.sede, montura: monObj?.nombre });
-    openWA(msg, getSedeWhatsapp(sedes, info.sede));
+    return openWA(msg, getSedeWhatsapp(sedes, info.sede));
   }
 
   return (
@@ -189,7 +196,7 @@ export function PageLentes() {
           </div>
           <div style={S.actionsRow}>
             <button style={{ ...btnGhost, width: "auto" }} onClick={() => setMostrarAgendarCita(true)}>
-              📅 No tengo receta — agendar examen
+              📅 No tengo receta — solicitar examen
             </button>
             <button style={{ ...btnPrimary, width: "auto", padding: "10px 22px" }} onClick={() => setStep(2)}>
               Continuar →
@@ -275,7 +282,9 @@ export function PageLentes() {
             <div style={S.cotizNum}>${total}</div>
           </div>
           {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-          <GoogleAuthGate>
+          {confirmacion && <p style={{ color: colors.blue700, fontSize: 13, marginBottom: 12 }}>{confirmacion}</p>}
+          {!confirmacion && (
+            <>
             <div style={formGroupFull}>
               <label style={label}>Tu nombre</label>
               <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
@@ -294,12 +303,14 @@ export function PageLentes() {
                 ))}
               </select>
             </div>
+            <p style={{ color: colors.slate500, fontSize: 13, marginBottom: 12 }}>Primero registramos la cotización para seguimiento. Si la sede tiene WhatsApp configurado, se abrirá el chat con el resumen.</p>
             <button style={btnWA} onClick={enviarWA} disabled={enviando}>
-              {enviando ? "Enviando…" : "💬 Enviar cotización por WhatsApp"}
+              {enviando ? "Registrando…" : "Registrar cotización"}
             </button>
-          </GoogleAuthGate>
+            </>
+          )}
           <button style={{ ...btnGhost, marginTop: 10 }} onClick={() => setMostrarAgendarCita(true)} disabled={enviando}>
-            📅 Agendar examen visual primero
+            📅 Solicitar examen visual primero
           </button>
           <button style={{ ...btnGhost, marginTop: 8 }} onClick={() => setStep(2)} disabled={enviando}>
             ← Atrás

@@ -159,10 +159,10 @@ Issues creados para esta implementacion:
 | Fase | Linear | Estado actual | Prioridad | Dependencias |
 |---|---|---|---|---|
 | 0 | [MAR-107](https://linear.app/marlondev/issue/MAR-107/storefront-publico-corregir-confianza-basica-nav-mobile-y-estados) | Done | High | ninguna |
-| 1 | [MAR-108](https://linear.app/marlondev/issue/MAR-108/storefront-publico-preparar-datos-assets-y-contenido-real-para) | Backlog | High | MAR-103, MAR-104 |
+| 1 | [MAR-108](https://linear.app/marlondev/issue/MAR-108/storefront-publico-preparar-datos-assets-y-contenido-real-para) | In Progress | High | MAR-103, MAR-104 |
 | 2 | [MAR-109](https://linear.app/marlondev/issue/MAR-109/storefront-publico-redisenar-home-y-sistema-visual-comercialsocial) | Backlog | High | MAR-107 |
 | 3 | [MAR-110](https://linear.app/marlondev/issue/MAR-110/catalogo-publico-filtros-profesionales-detalle-de-producto-y-cards) | Backlog | High | MAR-103, MAR-107 |
-| 4 | [MAR-111](https://linear.app/marlondev/issue/MAR-111/flujos-publicos-reducir-friccion-de-reserva-cotizacion-y-citas) | Backlog | High | MAR-107 |
+| 4 | [MAR-111](https://linear.app/marlondev/issue/MAR-111/flujos-publicos-reducir-friccion-de-reserva-cotizacion-y-citas) | Done | High | MAR-107 |
 | 5 | [MAR-112](https://linear.app/marlondev/issue/MAR-112/storefront-publico-performance-seo-basico-y-documentacion-post) | Backlog | Medium | MAR-107 |
 
 ## Dependencias practicas
@@ -225,47 +225,49 @@ Linear: [MAR-108](https://linear.app/marlondev/issue/MAR-108/storefront-publico-
 
 Objetivo: reunir o bloquear explicitamente lo que la UI V1 puede usar sin ampliar el backend. No se deben pedir ni prometer campos que el modelo actual no soporta.
 
+Estado 2026-07-11: contrato de contenido V1 creado en `UX-UI-CONTENT-CONTRACT-V1.md`. Se verifico que no hay Excel/CSV ni assets reales de producto en el repo/Downloads; MAR-103 sigue Backlog y MAR-104 sigue In Progress con datos de sedes incompletos. Cashea/promos/marcas/claims quedan bloqueados hasta confirmacion explicita del cliente/Carlos.
+
 Checklist:
 
-- [ ] Confirmar estado de MAR-103.
-- [ ] Confirmar estado de MAR-104.
-- [ ] Revisar manualmente las capturas/posteos disponibles de Instagram como referencia visual.
-- [ ] Definir imagen principal por producto (`imagenUrl`) o fallback visual profesional.
-- [ ] No exigir fotos multiples por producto: el backend V1 solo soporta una `imagenUrl`.
-- [ ] Definir campos del catalogo real soportados por V1:
-  - [ ] nombre
-  - [ ] categoriaId/categoria
-  - [ ] precio
-  - [ ] imagenUrl
-  - [ ] descripcion
-  - [ ] stock
-  - [ ] destacado
-- [ ] Confirmar categorias reales como registros `categorias` (`key`, `label`, `orden`).
-- [ ] Definir campos de sedes soportados por V1:
-  - [ ] ciudad
-  - [ ] direccion
-  - [ ] telefono
-  - [ ] WhatsApp
-  - [ ] horario
-  - [ ] link Maps
-- [ ] Confirmar si Cashea debe mostrarse como bloque/copy estatico de V1; no hay modelo backend para Cashea.
-- [ ] Confirmar si hay promociones vigentes como bloque/copy estatico de V1; no hay modelo backend para promociones.
-- [ ] Confirmar claims visibles solo si hay evidencia; no hay modelo backend para claims.
-- [ ] Marcar como fuera de V1 cualquier necesidad de marca/color/material/medidas/forma/variantes/disponibilidad por sede.
-- [ ] Documentar que queda bloqueado por cliente/Carlos y que queda fuera por modelo V1.
+- [x] Confirmar estado de MAR-103: Backlog, bloqueado por Excel/catalogo real del cliente.
+- [x] Confirmar estado de MAR-104: In Progress, bloqueado por datos reales de sedes.
+- [x] Revisar manualmente las capturas/posteos disponibles de Instagram como referencia visual.
+- [x] Definir imagen principal por producto (`imagenUrl`) o fallback visual profesional.
+- [x] No exigir fotos multiples por producto: el backend V1 solo soporta una `imagenUrl`.
+- [x] Definir campos del catalogo real soportados por V1:
+  - [x] nombre
+  - [x] categoriaId/categoria
+  - [x] precio
+  - [x] imagenUrl
+  - [x] descripcion
+  - [x] stock
+  - [x] destacado
+- [x] Confirmar categorias reales como registros `categorias` (`key`, `label`, `orden`).
+- [x] Definir campos de sedes soportados por V1:
+  - [x] ciudad
+  - [x] direccion
+  - [x] telefono
+  - [x] WhatsApp
+  - [x] horario
+  - [x] link Maps
+- [x] Confirmar si Cashea debe mostrarse como bloque/copy estatico de V1: no confirmado; no mostrar hasta confirmacion.
+- [x] Confirmar si hay promociones vigentes como bloque/copy estatico de V1: no confirmado; no mostrar hasta confirmacion.
+- [x] Confirmar claims visibles solo si hay evidencia: no hay evidencia suficiente; no mostrar claims numericos/politicas.
+- [x] Marcar como fuera de V1 cualquier necesidad de marca/color/material/medidas/forma/variantes/disponibilidad por sede.
+- [x] Documentar que queda bloqueado por cliente/Carlos y que queda fuera por modelo V1.
 
 Criterios de aceptacion:
 
-- [ ] El rediseño puede implementarse sin inventar informacion ni ampliar el backend de forma implicita.
-- [ ] Los placeholders que queden tienen razon explicita.
-- [ ] MAR-103 y MAR-104 quedan enlazados como bloqueos donde corresponda.
-- [ ] Ningun checklist de V1 exige marca/color/material/medidas/politicas/claims como datos estructurados.
+- [x] El rediseño puede implementarse sin inventar informacion ni ampliar el backend de forma implicita.
+- [x] Los placeholders que queden tienen razon explicita.
+- [x] MAR-103 y MAR-104 quedan enlazados como bloqueos donde corresponda.
+- [x] Ningun checklist de V1 exige marca/color/material/medidas/politicas/claims como datos estructurados.
 
 Verificacion:
 
-- [ ] Checklist cruzado contra MAR-103.
-- [ ] Checklist cruzado contra MAR-104.
-- [ ] No marcar Done si datos reales siguen ausentes sin nota de bloqueo.
+- [x] Checklist cruzado contra MAR-103.
+- [x] Checklist cruzado contra MAR-104.
+- [x] No marcar Done si datos reales siguen ausentes sin nota de bloqueo.
 
 ## Fase 2 - Home y sistema visual comercial/social + clinica
 
@@ -359,38 +361,40 @@ Linear: [MAR-111](https://linear.app/marlondev/issue/MAR-111/flujos-publicos-red
 
 Objetivo: reducir friccion y hacer honestos los flujos que terminan en WhatsApp.
 
+Estado 2026-07-11: implementada y verificada contra emuladores locales. Decision: Google login deja de ser obligatorio en conversion publica; nombre/telefono + registro backend es suficiente para V1. Si la sede no tiene WhatsApp real configurado, el flujo registra la solicitud y muestra confirmacion honesta en vez de abrir `wa.me/Por definir`.
+
 Checklist:
 
-- [ ] Auditar `ReservaModal`.
-- [ ] Auditar `PageLentes`.
-- [ ] Auditar `AgendarCitaModal`.
-- [ ] Auditar `GoogleAuthGate`.
-- [ ] Decidir si Google login es obligatorio, opcional o removido.
-- [ ] Si se mantiene login, explicar el valor para el cliente.
-- [ ] Si se vuelve opcional, permitir continuar con nombre/telefono.
-- [ ] Mejorar microcopy antes de abrir WhatsApp.
-- [ ] Agregar confirmacion visual de registro cuando aplique.
-- [ ] Mejorar errores de backend/red.
-- [ ] Revisar flujo "no tengo receta".
-- [ ] Cambiar "agendar" por "solicitar cita" si no hay disponibilidad real.
-- [ ] Evitar prometer slots reales sin calendario real.
-- [ ] Validar mobile: teclado, scroll, botones y modales.
+- [x] Auditar `ReservaModal`.
+- [x] Auditar `PageLentes`.
+- [x] Auditar `AgendarCitaModal`.
+- [x] Auditar `GoogleAuthGate`.
+- [x] Decidir si Google login es obligatorio, opcional o removido: removido de conversion publica.
+- [x] Si se mantiene login, explicar el valor para el cliente: no aplica, no se mantiene en conversion publica.
+- [x] Si se vuelve opcional, permitir continuar con nombre/telefono.
+- [x] Mejorar microcopy antes de abrir WhatsApp.
+- [x] Agregar confirmacion visual de registro cuando aplique.
+- [x] Mejorar errores de backend/red.
+- [x] Revisar flujo "no tengo receta".
+- [x] Cambiar "agendar" por "solicitar cita" si no hay disponibilidad real.
+- [x] Evitar prometer slots reales sin calendario real.
+- [x] Validar mobile: teclado, scroll, botones y modales.
 
 Criterios de aceptacion:
 
-- [ ] El usuario entiende por que se piden datos.
-- [ ] El flujo no bloquea conversion sin razon de negocio.
-- [ ] WhatsApp se abre con mensaje correcto.
-- [ ] Backend registra pedido/cita/cotizacion antes de abrir WhatsApp cuando aplique.
-- [ ] No hay modales incomodos en mobile.
+- [x] El usuario entiende por que se piden datos.
+- [x] El flujo no bloquea conversion sin razon de negocio.
+- [x] WhatsApp se abre con mensaje correcto cuando hay numero valido; si falta, se registra y muestra confirmacion.
+- [x] Backend registra pedido/cita/cotizacion antes de abrir WhatsApp cuando aplique.
+- [x] No hay modales incomodos en mobile.
 
 Verificacion:
 
-- [ ] Probar reserva desde catalogo.
-- [ ] Probar cotizacion completa.
-- [ ] Probar cita desde lentes sin receta.
-- [ ] Probar cita desde servicios.
-- [ ] Revisar admin/backoffice si el registro aparece.
+- [x] Probar reserva desde catalogo.
+- [x] Probar cotizacion completa.
+- [x] Probar cita desde lentes sin receta.
+- [x] Probar cita desde servicios.
+- [x] Revisar backend local: pedidos/cotizaciones/citas registrados en Firestore emulator.
 
 ## Fase 5 - Performance, SEO y documentacion
 

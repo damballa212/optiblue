@@ -3,7 +3,6 @@ import type { Producto } from "../../types";
 import { useSedes } from "../../hooks/useSedes";
 import { pedidosApi } from "../../lib/api/pedidos";
 import { buildWAMessage, openWA, getSedeWhatsapp } from "../../lib/whatsapp";
-import { GoogleAuthGate } from "../shared/GoogleAuthGate";
 import { overlay, modal, modalTitle, formGroupFull, label, input, select, btnWA, btnGhost } from "../../styles/shared";
 import { colors } from "../../styles/tokens";
 
@@ -19,6 +18,7 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
   const [telefono, setTelefono] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmacion, setConfirmacion] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sede && sedes.length > 0) setSede(sedes[0].ciudad);
@@ -37,6 +37,7 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
 
     setEnviando(true);
     setError(null);
+    setConfirmacion(null);
     try {
       // Se registra el pedido en Firestore ANTES de abrir WhatsApp — es el
       // "carrito" del MVP: sin esto, el back office no tiene forma de saber
@@ -50,8 +51,12 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
         fecha: new Date().toISOString().slice(0, 10),
       });
       const msg = buildWAMessage({ tipo: "reserva", nombre: producto.nombre, precio: producto.precio, sede });
-      openWA(msg, getSedeWhatsapp(sedes, sede));
-      onClose();
+      const whatsappAbierto = openWA(msg, getSedeWhatsapp(sedes, sede));
+      if (whatsappAbierto) {
+        onClose();
+      } else {
+        setConfirmacion("Tu reserva quedó registrada. Esta sede todavía no tiene WhatsApp real configurado; el equipo debe contactarte con el teléfono que dejaste.");
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo registrar tu reserva. Intenta de nuevo.");
     } finally {
@@ -70,7 +75,9 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
         )}
         <div style={{ fontSize: 18, fontWeight: 800, color: colors.blue700, textAlign: "center", marginBottom: 20 }}>${producto.precio}</div>
         {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-        <GoogleAuthGate>
+        {confirmacion && <p style={{ color: colors.blue700, fontSize: 13, marginBottom: 12 }}>{confirmacion}</p>}
+        {!confirmacion && (
+          <>
           <div style={formGroupFull}>
             <label style={label}>Tu nombre</label>
             <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
@@ -89,13 +96,14 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
               ))}
             </select>
           </div>
-          <p style={{ fontSize: 13, color: colors.slate500, marginBottom: 20 }}>Al continuar te redirigiremos a WhatsApp para coordinar tu reserva con la sede seleccionada.</p>
+          <p style={{ fontSize: 13, color: colors.slate500, marginBottom: 20 }}>Primero registramos tu solicitud para que el equipo pueda hacer seguimiento. Si la sede tiene WhatsApp configurado, se abrirá el chat para coordinar.</p>
           <button style={btnWA} onClick={confirmar} disabled={enviando}>
-            {enviando ? "Enviando…" : "💬 Continuar por WhatsApp"}
+            {enviando ? "Registrando…" : "Registrar solicitud"}
           </button>
-        </GoogleAuthGate>
+          </>
+        )}
         <button style={{ ...btnGhost, marginTop: 10 }} onClick={onClose} disabled={enviando}>
-          Cancelar
+          {confirmacion ? "Cerrar" : "Cancelar"}
         </button>
       </div>
     </div>

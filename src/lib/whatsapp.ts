@@ -43,6 +43,15 @@ export function getSedeWhatsapp(sedes: Sede[], ciudad?: string): string {
   return sedes.find((s) => s.ciudad === ciudad)?.whatsapp ?? fallback;
 }
 
-export function openWA(msg: string, whatsappNumber: string): void {
-  window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
+export function normalizeWhatsappNumber(whatsappNumber: string): string | null {
+  if (!whatsappNumber || /por definir/i.test(whatsappNumber)) return null;
+  const digits = whatsappNumber.replace(/\D/g, "");
+  return digits.length >= 8 ? digits : null;
+}
+
+export function openWA(msg: string, whatsappNumber: string): boolean {
+  const normalized = normalizeWhatsappNumber(whatsappNumber);
+  if (!normalized) return false;
+  window.open(`https://wa.me/${normalized}?text=${msg}`, "_blank");
+  return true;
 }

@@ -12,8 +12,8 @@ export function PageServicios() {
   const [servicioAAgendar, setServicioAAgendar] = useState<Servicio | null>(null);
 
   function citaAgendada(servicio: Servicio, info: CitaAgendada) {
-    const msg = encodeURIComponent(`Hola OptiBlue! Quisiera agendar: *${servicio.nombre}*\nFecha: ${info.fecha} — Hora: ${info.hora}`);
-    openWA(msg, getSedeWhatsapp(sedes, info.sede));
+    const msg = encodeURIComponent(`Hola OptiBlue! Quisiera solicitar: *${servicio.nombre}*\nFecha preferida: ${info.fecha} — Hora preferida: ${info.hora}`);
+    return openWA(msg, getSedeWhatsapp(sedes, info.sede));
   }
 
   return (
@@ -29,7 +29,7 @@ export function PageServicios() {
             <div style={S.servDesc}>{s.desc}</div>
             <div style={S.servPrice}>{s.precio}</div>
             <button style={{ ...btnPrimary, marginTop: 12 }} onClick={() => setServicioAAgendar(s)}>
-              📅 Agendar cita
+              📅 Solicitar cita
             </button>
           </div>
         ))}

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSedes } from "../../hooks/useSedes";
 import { citasApi } from "../../lib/api/citas";
-import { GoogleAuthGate } from "./GoogleAuthGate";
 import { overlay, modal, modalTitle, formGroupFull, label, input, select, btnWA, btnGhost } from "../../styles/shared";
+import { colors } from "../../styles/tokens";
 
 export interface CitaAgendada {
   nombre: string;
@@ -17,7 +17,7 @@ interface AgendarCitaModalProps {
   onClose: () => void;
   // El modal solo persiste la cita — cada caller arma su propio mensaje de
   // WhatsApp con el contexto que tenga (montura, servicio, etc.).
-  onAgendada: (info: CitaAgendada) => void;
+  onAgendada: (info: CitaAgendada) => boolean | void;
 }
 
 export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaModalProps) {
@@ -29,6 +29,7 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
   const [hora, setHora] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmacion, setConfirmacion] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sede && sedes.length > 0) setSede(sedes[0].ciudad);
@@ -47,12 +48,17 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
 
     setEnviando(true);
     setError(null);
+    setConfirmacion(null);
     try {
       await citasApi.crearCita({ nombre: nombre.trim(), telefono: telefono.trim(), sedeId: sedeObj.id, fecha, hora, motivo });
-      onAgendada({ nombre: nombre.trim(), telefono: telefono.trim(), sede, fecha, hora });
-      onClose();
+      const whatsappAbierto = onAgendada({ nombre: nombre.trim(), telefono: telefono.trim(), sede, fecha, hora });
+      if (whatsappAbierto === false) {
+        setConfirmacion("Tu solicitud de cita quedó registrada. Esta sede todavía no tiene WhatsApp real configurado; el equipo debe contactarte con el teléfono que dejaste.");
+      } else {
+        onClose();
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo agendar la cita. Intenta de nuevo.");
+      setError(e instanceof Error ? e.message : "No se pudo registrar la solicitud de cita. Intenta de nuevo.");
     } finally {
       setEnviando(false);
     }
@@ -61,9 +67,12 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
   return (
     <div style={overlay} onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
-        <div style={modalTitle}>📅 Agendar cita — {motivo}</div>
+        <div style={modalTitle}>📅 Solicitar cita — {motivo}</div>
         {error && <p style={{ color: "crimson", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-        <GoogleAuthGate>
+        {confirmacion && <p style={{ color: colors.blue700, fontSize: 13, marginBottom: 12 }}>{confirmacion}</p>}
+        {!confirmacion && (
+          <>
+          <p style={{ color: colors.slate500, fontSize: 13, marginBottom: 12 }}>La fecha y hora son preferidas, no una reserva automática. Primero registramos tu solicitud y luego la sede confirma disponibilidad.</p>
           <div style={formGroupFull}>
             <label style={label}>Tu nombre</label>
             <input style={input} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="¿Cómo te llamas?" />
@@ -73,11 +82,11 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
             <input style={input} value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+58 412-000-0000" />
           </div>
           <div style={formGroupFull}>
-            <label style={label}>Fecha</label>
+            <label style={label}>Fecha preferida</label>
             <input style={input} type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
           </div>
           <div style={formGroupFull}>
-            <label style={label}>Hora</label>
+            <label style={label}>Hora preferida</label>
             <input style={input} type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
           </div>
           <div style={formGroupFull}>
@@ -91,11 +100,12 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
             </select>
           </div>
           <button style={btnWA} onClick={confirmar} disabled={enviando}>
-            {enviando ? "Agendando…" : "💬 Confirmar por WhatsApp"}
+            {enviando ? "Registrando…" : "Registrar solicitud"}
           </button>
-        </GoogleAuthGate>
+          </>
+        )}
         <button style={{ ...btnGhost, marginTop: 10 }} onClick={onClose} disabled={enviando}>
-          Cancelar
+          {confirmacion ? "Cerrar" : "Cancelar"}
         </button>
       </div>
     </div>
