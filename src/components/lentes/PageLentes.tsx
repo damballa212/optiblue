@@ -1,8 +1,8 @@
 import { CalendarSearch, Check, CheckCircle2, ChevronLeft, ChevronRight, Circle, FileText, Glasses } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { EXTRAS_LENTES } from "../../data";
 import { useCategorias } from "../../hooks/useCategorias";
+import { useConfiguracionCotizacion } from "../../hooks/useConfiguracionCotizacion";
 import { useProductos } from "../../hooks/useProductos";
 import { useSedes } from "../../hooks/useSedes";
 import { cotizacionesApi } from "../../lib/api/cotizaciones";
@@ -10,12 +10,12 @@ import { buildWAMessage, getSedeWhatsapp, openWA } from "../../lib/whatsapp";
 import { AgendarCitaModal } from "../shared/AgendarCitaModal";
 import { DataState } from "../shared/DataState";
 import { OptionalGooglePrefill } from "../shared/OptionalGooglePrefill";
+import { calcularTotalPreview, extrasActivos } from "./cotizacionPricing";
 import form from "../shared/PublicForm.module.css";
 import styles from "./PageLentes.module.css";
 
 const GRAD_STEPS = ["", "0.25", "0.50", "0.75", "1.00", "1.25", "1.50", "1.75", "2.00", "2.25", "2.50", "2.75", "3.00", "3.50", "4.00", "4.50", "5.00", "5.50", "6.00"];
 const STEP_LABELS = ["Montura y graduación", "Extras", "Sede y cotización"];
-const LENTE_BASE = 10;
 
 function GraduationSelect({ id, label, value, onChange, astigmatism = false }: { id: string; label: string; value: string; onChange: (value: string) => void; astigmatism?: boolean }) {
   return <div className={form.field}><label htmlFor={id}>{label}</label><select id={id} value={value} onChange={(event) => onChange(event.target.value)}><option value="">{astigmatism ? "Sin astigmatismo" : "Sin corrección"}</option>{GRAD_STEPS.slice(1).map((step) => <option key={`-${step}`} value={`-${step}`}>-{step}</option>)}{!astigmatism && GRAD_STEPS.slice(1).map((step) => <option key={`+${step}`} value={`+${step}`}>+{step}</option>)}</select></div>;
@@ -26,6 +26,7 @@ export function PageLentes() {
   const { productos, loading: productosLoading, error: productosError } = useProductos();
   const { categorias, loading: categoriasLoading } = useCategorias();
   const { sedes } = useSedes();
+  const { configuracion, loading: configLoading, error: configError } = useConfiguracionCotizacion();
   const monturasCategoriaId = categorias.find((category) => category.key === "monturas")?.id;
   const monturas = productos.filter((product) => product.categoriaId === monturasCategoriaId);
   const [montura, setMontura] = useState("");
@@ -54,8 +55,12 @@ export function PageLentes() {
   }, [sede, sedes]);
 
   const selectedFrame = monturas.find((item) => item.id === montura);
-  const extrasTotal = extras.reduce((sum, key) => sum + (EXTRAS_LENTES.find((extra) => extra.key === key)?.precio ?? 0), 0);
-  const total = (selectedFrame?.precio ?? 0) + extrasTotal + LENTE_BASE;
+  const extrasDisponibles = extrasActivos(configuracion);
+  const lenteBase = configuracion?.lenteBase ?? 0;
+  const extrasTotal = extras.reduce((sum, key) => sum + (extrasDisponibles.find((extra) => extra.key === key)?.precio ?? 0), 0);
+  // Total de vista previa — el total real y autoritativo lo calcula el
+  // backend y es el que se usa en la confirmación y el mensaje de WhatsApp.
+  const total = calcularTotalPreview(configuracion, selectedFrame?.precio ?? 0, extras);
 
   function toggleExtra(key: string) {
     setExtras((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key]);
@@ -71,12 +76,21 @@ export function PageLentes() {
       setError("Elige una sede.");
       return;
     }
+    if (!configuracion) {
+      setError("No se pudo cargar la configuración de precios. Intenta de nuevo.");
+      return;
+    }
     setEnviando(true);
     setError(null);
     try {
-      await cotizacionesApi.crearCotizacion({ nombre: nombre.trim(), telefono: telefono.trim(), sedeId: selectedLocation.id, productoId: selectedFrame.id, od, oi, astigmatismoOD: astOD, astigmatismoOI: astOI, extras, total, fecha: new Date().toISOString().slice(0, 10) });
-      const extraLabels = extras.map((key) => EXTRAS_LENTES.find((extra) => extra.key === key)?.label ?? key);
-      const message = buildWAMessage({ tipo: "cotizacion", montura: selectedFrame.nombre, od, oi, astOD, astOI, extras: extraLabels, total, sede });
+      // Se envía sin "total": lo calcula el backend a partir del producto real
+      // y la configuración vigente (nunca lo que el cliente traiga en memoria).
+      const creada = await cotizacionesApi.crearCotizacion({ nombre: nombre.trim(), telefono: telefono.trim(), sedeId: selectedLocation.id, productoId: selectedFrame.id, od, oi, astigmatismoOD: astOD, astigmatismoOI: astOI, extras, fecha: new Date().toISOString().slice(0, 10) });
+      const extraLabels = extras.map((key) => extrasDisponibles.find((extra) => extra.key === key)?.label ?? key);
+      // Usa el total devuelto por el backend, no el de vista previa: si la
+      // configuración cambió entre que se cargó la página y el envío, el
+      // total autoritativo prevalece.
+      const message = buildWAMessage({ tipo: "cotizacion", montura: selectedFrame.nombre, od, oi, astOD, astOI, extras: extraLabels, total: creada.total, sede });
       const opened = openWA(message, getSedeWhatsapp(sedes, sede));
       setConfirmacion(opened ? "Cotización registrada. Se abrió WhatsApp para continuar con la sede." : "Cotización registrada. La sede todavía no tiene WhatsApp real configurado; el equipo debe contactarte al teléfono indicado.");
     } catch (reason) {
@@ -87,7 +101,11 @@ export function PageLentes() {
   }
 
   const citaAgendada = (info: { sede: string }) => openWA(buildWAMessage({ tipo: "cita", sede: info.sede, montura: selectedFrame?.nombre }), getSedeWhatsapp(sedes, info.sede));
-  const loading = productosLoading || categoriasLoading;
+  // La config de precios se necesita desde el paso de extras en adelante, así
+  // que bloquea todo el wizard igual que productos/categorías — no se puede
+  // avanzar a extras ni al resumen sin ella (evita mostrar/cobrar un total
+  // que el backend luego recalcularía distinto).
+  const loading = productosLoading || categoriasLoading || configLoading;
 
   return (
     <main className={styles.page}>
@@ -95,10 +113,10 @@ export function PageLentes() {
       <section className={styles.wizard}>
         <nav className={styles.steps} aria-label="Pasos de cotización">{STEP_LABELS.map((label, index) => <button key={label} type="button" onClick={() => setStep(index + 1)} className={step === index + 1 ? styles.activeStep : ""}><span>{index + 1}</span>{label}</button>)}</nav>
         {loading && <DataState kind="loading" title="Cargando monturas" message="Consultando el catálogo disponible." />}
-        {!loading && productosError && <DataState kind="error" title="No pudimos cargar las monturas" message="Intenta de nuevo en unos minutos." />}
-        {!loading && !productosError && monturas.length === 0 && <DataState kind="empty" title="No hay monturas disponibles" message="El catálogo actual no contiene monturas para cotizar." />}
+        {!loading && (productosError || configError) && <DataState kind="error" title="No pudimos cargar la cotización" message={productosError ?? configError ?? "Intenta de nuevo en unos minutos."} />}
+        {!loading && !productosError && !configError && monturas.length === 0 && <DataState kind="empty" title="No hay monturas disponibles" message="El catálogo actual no contiene monturas para cotizar." />}
 
-        {!loading && !productosError && monturas.length > 0 && step === 1 && <div className={styles.panel}>
+        {!loading && !productosError && !configError && monturas.length > 0 && step === 1 && <div className={styles.panel}>
           <div className={styles.panelHeading}><span className={styles.panelIcon}><Glasses aria-hidden="true" /></span><div><h2>Montura y graduación</h2><p>Usa los valores de tu receta más reciente. Los campos en blanco se registran sin corrección.</p></div></div>
           <div className={`${form.field} ${form.full}`}><label htmlFor="frame">Montura</label><select id="frame" value={montura} onChange={(event) => setMontura(event.target.value)}>{monturas.map((item) => <option key={item.id} value={item.id}>{item.nombre} — ${item.precio}</option>)}</select></div>
           <div className={form.grid}><GraduationSelect id="od" label="Miopía / Hipermetropía OD" value={od} onChange={setOd} /><GraduationSelect id="oi" label="Miopía / Hipermetropía OI" value={oi} onChange={setOi} /><GraduationSelect id="ast-od" label="Astigmatismo OD" value={astOD} onChange={setAstOD} astigmatism /><GraduationSelect id="ast-oi" label="Astigmatismo OI" value={astOI} onChange={setAstOI} astigmatism /></div>
@@ -107,14 +125,14 @@ export function PageLentes() {
 
         {!loading && step === 2 && <div className={styles.panel}>
           <div className={styles.panelHeading}><span className={styles.panelIcon}><Check aria-hidden="true" /></span><div><h2>Extras de lentes</h2><p>Selecciona únicamente los tratamientos que quieres incluir en la estimación.</p></div></div>
-          <div className={styles.extras}>{EXTRAS_LENTES.map((extra) => { const selected = extras.includes(extra.key); return <button key={extra.key} type="button" className={selected ? styles.extraSelected : ""} onClick={() => toggleExtra(extra.key)}>{selected ? <CheckCircle2 aria-hidden="true" /> : <Circle aria-hidden="true" />}<span><strong>{extra.label}</strong><small>{extra.desc}</small></span><b>+${extra.precio}</b></button>; })}</div>
+          <div className={styles.extras}>{extrasDisponibles.map((extra) => { const selected = extras.includes(extra.key); return <button key={extra.key} type="button" className={selected ? styles.extraSelected : ""} onClick={() => toggleExtra(extra.key)}>{selected ? <CheckCircle2 aria-hidden="true" /> : <Circle aria-hidden="true" />}<span><strong>{extra.label}</strong><small>{extra.descripcion}</small></span><b>+${extra.precio}</b></button>; })}</div>
           <div className={styles.panelActions}><button className={styles.secondaryButton} type="button" onClick={() => setStep(1)}><ChevronLeft size={17} /> Atrás</button><button className={styles.primaryButton} type="button" onClick={() => setStep(3)}>Continuar <ChevronRight size={17} /></button></div>
         </div>}
 
         {!loading && step === 3 && <div className={styles.panel}>
           <div className={styles.panelHeading}><span className={styles.panelIcon}><FileText aria-hidden="true" /></span><div><h2>Sede y cotización</h2><p>Revisa el resumen y registra tus datos antes de continuar por WhatsApp.</p></div></div>
           <div className={styles.quoteLayout}>
-            <div className={styles.summary}><h3>Resumen</h3><dl><div><dt>Montura</dt><dd>{selectedFrame?.nombre}</dd></div><div><dt>OD</dt><dd>{od || "Sin corrección"}</dd></div><div><dt>OI</dt><dd>{oi || "Sin corrección"}</dd></div><div><dt>Extras</dt><dd>{extras.length ? extras.map((key) => EXTRAS_LENTES.find((extra) => extra.key === key)?.label).join(", ") : "Ninguno"}</dd></div></dl><div className={styles.total}><span>Montura ${selectedFrame?.precio} + lente base ${LENTE_BASE} + extras ${extrasTotal}</span><strong>${total}</strong><small>Total estimado</small></div></div>
+            <div className={styles.summary}><h3>Resumen</h3><dl><div><dt>Montura</dt><dd>{selectedFrame?.nombre}</dd></div><div><dt>OD</dt><dd>{od || "Sin corrección"}</dd></div><div><dt>OI</dt><dd>{oi || "Sin corrección"}</dd></div><div><dt>Extras</dt><dd>{extras.length ? extras.map((key) => extrasDisponibles.find((extra) => extra.key === key)?.label).join(", ") : "Ninguno"}</dd></div></dl><div className={styles.total}><span>Montura ${selectedFrame?.precio} + lente base ${lenteBase} + extras ${extrasTotal}</span><strong>${total}</strong><small>Total estimado</small></div></div>
             <div className={styles.formSide}>
               {error && <p className={form.error} role="alert">{error}</p>}
               {confirmacion ? <div className={styles.confirmation}><CheckCircle2 aria-hidden="true" /><div><h3>Cotización registrada</h3><p>{confirmacion}</p></div></div> : <>
