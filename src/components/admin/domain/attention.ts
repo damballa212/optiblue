@@ -1,4 +1,5 @@
 import type { Cita, Cotizacion, Pedido, Producto, Sede } from "../../../types";
+import { formatAdminDate } from "./presentation";
 
 export type AdminEntityKind = "pedido" | "cita" | "cotizacion";
 
@@ -93,7 +94,7 @@ export function buildAttentionItems({
         phone: item.telefono,
         locationLabel: locationLabel(item.sedeId),
         contextLabel: item.motivo || "Motivo no indicado",
-        dateLabel: timestamp === null ? null : `${item.fecha} · ${item.hora}`,
+        dateLabel: timestamp === null ? null : formatAdminDate(item.fecha, item.hora),
         nextActionLabel: "Confirmar cita",
         entity: item,
         sortGroup: timestamp === null ? 1 : 0,
@@ -113,7 +114,7 @@ export function buildAttentionItems({
           phone: item.telefono,
           locationLabel: locationLabel(item.sedeId),
           contextLabel: productLabel(item.productoId),
-          dateLabel: timestamp === null ? null : item.fecha,
+          dateLabel: timestamp === null ? null : formatAdminDate(item.fecha),
           nextActionLabel: "Resolver pago",
           entity: item,
           sortGroup: timestamp === null ? 3 : 2,
@@ -131,7 +132,7 @@ export function buildAttentionItems({
           phone: item.telefono,
           locationLabel: locationLabel(item.sedeId),
           contextLabel: productLabel(item.productoId),
-          dateLabel: timestamp === null ? null : item.fecha,
+          dateLabel: timestamp === null ? null : formatAdminDate(item.fecha),
           nextActionLabel: "Contactar",
           entity: item,
           sortGroup: timestamp === null ? 3 : 2,

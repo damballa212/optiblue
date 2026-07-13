@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ArrowLeft, LockKeyhole, ShieldCheck } from "lucide-react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../lib/auth/firebaseAuth";
 import { useAuth } from "../lib/auth/AuthContext";
+import { STOREFRONT_URL } from "../lib/appUrls";
 import styles from "./AdminLogin.module.css";
 
 // Página standalone — a propósito no comparte NavBar/Footer del sitio
@@ -102,10 +103,10 @@ export function AdminLogin() {
             </button>
           </form>
 
-          <Link to="/">
+          <a href={STOREFRONT_URL}>
             <ArrowLeft aria-hidden="true" />
             Volver al sitio público
-          </Link>
+          </a>
         </section>
       </main>
     </div>

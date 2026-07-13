@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!--
+    Ícono maestro PWA del storefront público de OptiBlue.
+    Fiel al logo real de Instagram (@optiblue_, 37.9K seguidores): fondo
+    blanco, anillo navy, relleno sky, pupila blanca. Se prioriza coincidir
+    con la marca que el público ya reconoce por encima de cualquier variante
+    inventada sin ese asset a la vista.
+    - fondo: blanco
+    - anillo: - -brand-navy #002d63
+    - relleno del lente: - -brand-sky #54bfe8
+    - pupila: blanca
+    La marca ocupa ~55% del lienzo: dentro de la zona segura maskable (80%).
+  -->
+  <rect width="1024" height="1024" fill="#ffffff" />
+  <circle cx="512" cy="512" r="247" fill="#54bfe8" stroke="#002d63" stroke-width="66" />
+  <circle cx="512" cy="512" r="82" fill="#ffffff" />
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!--
+    Ícono maestro del Panel admin (PWA aparte de la del storefront público).
+    Fondo navy + anillo blanco: distingue la herramienta interna del ícono
+    público (fondo blanco, fiel al logo real de Instagram) para que el
+    personal no confunda las dos apps en el Dock/taskbar.
+  -->
+  <rect width="1024" height="1024" fill="#002d63" />
+  <circle cx="512" cy="512" r="247" fill="#54bfe8" stroke="#ffffff" stroke-width="66" />
+  <circle cx="512" cy="512" r="82" fill="#ffffff" />
+</svg>

@@ -4,6 +4,12 @@ import type { Cita, Cotizacion, Pedido } from "../../../types";
 import { useAdminOperations } from "../data/AdminOperationsContext";
 import type { AdminEntityKind } from "../domain/attention";
 import { buildAdminWhatsAppMessage } from "../domain/whatsapp";
+import {
+  formatAdminAmount,
+  formatAdminDate,
+  formatAdminEntityKind,
+} from "../domain/presentation";
+import { getAdminStatusMeta } from "../domain/status";
 import { AdminStatusBadge } from "./AdminStatusBadge";
 import { ResponsiveDetailSurface } from "./ResponsiveDetailSurface";
 import { StatusEditor } from "./StatusEditor";
@@ -79,7 +85,7 @@ export function AdminEntityDetail({
     <>
       <ResponsiveDetailSurface
         title={entity.nombre}
-        eyebrow={kind}
+        eyebrow={formatAdminEntityKind(kind)}
         onClose={onClose}
         footer={
           <>
@@ -103,7 +109,7 @@ export function AdminEntityDetail({
       >
         <div className={styles.detailSummary}>
           <div>
-            <span>Telefono</span>
+            <span>Teléfono</span>
             <strong>{entity.telefono}</strong>
           </div>
           <div>
@@ -124,11 +130,11 @@ export function AdminEntityDetail({
               </div>
               <div>
                 <dt>Precio registrado</dt>
-                <dd>${(entity as Pedido).precio}</dd>
+                <dd>{formatAdminAmount((entity as Pedido).precio)}</dd>
               </div>
               <div>
                 <dt>Fecha</dt>
-                <dd>{entity.fecha}</dd>
+                <dd>{formatAdminDate(entity.fecha)}</dd>
               </div>
             </>
           )}
@@ -137,7 +143,7 @@ export function AdminEntityDetail({
               <div>
                 <dt>Fecha y hora preferidas</dt>
                 <dd>
-                  {entity.fecha} · {(entity as Cita).hora}
+                  {formatAdminDate(entity.fecha, (entity as Cita).hora)}
                 </dd>
               </div>
               <div>
@@ -182,11 +188,11 @@ export function AdminEntityDetail({
               </div>
               <div>
                 <dt>Total registrado</dt>
-                <dd>${(entity as Cotizacion).total}</dd>
+                <dd>{formatAdminAmount((entity as Cotizacion).total)}</dd>
               </div>
               <div>
                 <dt>Fecha</dt>
-                <dd>{entity.fecha}</dd>
+                <dd>{formatAdminDate(entity.fecha)}</dd>
               </div>
             </>
           )}
@@ -196,7 +202,9 @@ export function AdminEntityDetail({
             <Check aria-hidden="true" />
             <div>
               <strong>Estado actualizado</strong>
-              <span>Ahora figura como {lastChange.current}.</span>
+              <span>
+                Ahora figura como {getAdminStatusMeta(kind, lastChange.current as never).label.toLowerCase()}.
+              </span>
             </div>
             <button type="button" onClick={undo} disabled={undoing}>
               <RotateCcw size={14} aria-hidden="true" />

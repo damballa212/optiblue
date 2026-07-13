@@ -12,6 +12,7 @@ import { useAdminOperations } from "../data/AdminOperationsContext";
 import { buildAttentionItems, type AdminEntityKind } from "../domain/attention";
 import { AdminDataState } from "../ui/AdminDataState";
 import { AdminEntityDetail } from "../ui/AdminEntityDetail";
+import { AdminPageHeading } from "../ui/AdminPageHeading";
 import styles from "../ui/AdminLayout.module.css";
 
 export function AdminTodayPage() {
@@ -52,21 +53,19 @@ export function AdminTodayPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.pageTitle}>
-        <div>
-          <span>Bandeja de atención</span>
-          <h2>Qué requiere atención</h2>
-          <p>{items.length} elementos en estados accionables</p>
-        </div>
-        <button
+      <AdminPageHeading
+        eyebrow="Bandeja de atención"
+        title="Qué requiere atención"
+        description={`${items.length} elementos en estados accionables`}
+        action={<button
           type="button"
           onClick={() => void operations.refreshAll()}
           disabled={loading}
         >
           <RefreshCw size={16} aria-hidden="true" />
           Actualizar
-        </button>
-      </div>
+        </button>}
+      />
       <section className={styles.summaryGrid}>
         <div>
           <strong>{counts.pedidos}</strong>
@@ -93,7 +92,7 @@ export function AdminTodayPage() {
         <strong>Siguiente por atender</strong>
         <span>
           <Filter size={14} aria-hidden="true" />
-          Prioridad verificada
+          Orden operativo
         </span>
       </div>
       {loading && items.length === 0 ? (

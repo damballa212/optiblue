@@ -2,18 +2,32 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- interactive-widget=resizes-content: revertido 2026-07-13. Soporte en
+         Safari/WebKit no confirmado (documentación contradictoria — MDN sin
+         tabla de compatibilidad, otra fuente dice que es un feature request
+         abierto en WebKit) y no resolvió el bug reportado de teclado en
+         modales dentro de la PWA instalada. Si tuviera algún efecto parcial,
+         interactúa mal con el `max-height: 94dvh` del modal (ver
+         ModalSurface.module.css). Pendiente de diagnóstico con grabación de
+         pantalla antes de volver a intentar un fix — ver nota Obsidian. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Catálogo, lentes adaptados, servicios visuales y sedes de OptiBlue en Venezuela." />
-    <meta name="robots" content="index,follow" />
+    <meta name="robots" content="%VITE_APP_ROBOTS%" />
     <meta name="theme-color" content="#0b2f6b" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="%VITE_APPLE_TOUCH_ICON%" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="%VITE_APP_MOBILE_TITLE%" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_VE" />
     <meta property="og:site_name" content="OptiBlue" />
-    <meta property="og:title" content="OptiBlue | Óptica y oftalmología en Venezuela" />
+    <meta property="og:title" content="%VITE_APP_TITLE%" />
     <meta property="og:description" content="Catálogo, lentes adaptados, servicios visuales y sedes de OptiBlue en Venezuela." />
-    <meta property="og:url" content="https://optiblue-prod.web.app" />
-    <link rel="canonical" href="https://optiblue-prod.web.app" />
-    <title>OptiBlue | Óptica y oftalmología en Venezuela</title>
+    <meta property="og:url" content="%VITE_APP_URL%" />
+    <link rel="canonical" href="%VITE_APP_URL%" />
+    <title>%VITE_APP_TITLE%</title>
   </head>
   <body>
     <div id="root"></div>

@@ -8,14 +8,21 @@ import {
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import type { Cita, Cotizacion, Pedido } from "../../../types";
 import { ModalSurface } from "../../shared/ModalSurface";
 import { useAdminOperations } from "../data/AdminOperationsContext";
 import type { AdminEntityKind } from "../domain/attention";
 import { filterAdminRecords } from "../domain/filters";
 import { ADMIN_STATUS_OPTIONS } from "../domain/status";
+import { getAdminStatusMeta } from "../domain/status";
+import {
+  formatAdminDate,
+  formatRecordCount,
+} from "../domain/presentation";
 import { AdminDataState } from "../ui/AdminDataState";
 import { AdminEntityDetail } from "../ui/AdminEntityDetail";
+import { AdminPageHeading } from "../ui/AdminPageHeading";
 import { AdminStatusBadge } from "../ui/AdminStatusBadge";
 import styles from "../ui/AdminLayout.module.css";
 
@@ -26,9 +33,19 @@ type WorkEntity = Pedido | Cita | Cotizacion;
 
 export function AdminWorkPage({ kind }: AdminWorkPageProps) {
   const operations = useAdminOperations();
-  const [query, setQuery] = useState("");
-  const [estado, setEstado] = useState("todos");
-  const [sedeId, setSedeId] = useState("todas");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get("q") ?? "";
+  const statusParam = searchParams.get("estado") ?? "todos";
+  const estado = (ADMIN_STATUS_OPTIONS[kind] as readonly string[]).includes(statusParam)
+    ? statusParam
+    : "todos";
+  const locationParam = searchParams.get("sede") ?? "todas";
+  const sedeId =
+    locationParam === "todas" ||
+    operations.loading.sedes ||
+    operations.sedes.some((item) => item.id === locationParam)
+      ? locationParam
+      : "todas";
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const records: WorkEntity[] =
@@ -41,6 +58,20 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
     () => filterAdminRecords(records, { query, estado, sedeId }),
     [records, query, estado, sedeId],
   );
+  const hasFilters =
+    query.trim() !== "" || estado !== "todos" || sedeId !== "todas";
+  const updateSearch = (changes: {
+    q?: string;
+    estado?: string;
+    sede?: string;
+  }) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(changes).forEach(([key, value]) => {
+      if (!value || value === "todos" || value === "todas") next.delete(key);
+      else next.set(key, value);
+    });
+    setSearchParams(next, { replace: true });
+  };
   const selected = selectedId
     ? records.find((item) => item.id === selectedId)
     : null;
@@ -86,22 +117,18 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
 
   return (
     <div className={styles.page}>
-      <div className={styles.pageTitle}>
-        <div>
-          <span>Operación</span>
-          <h2>{title}</h2>
-          <p>
-            {filtered.length} de {records.length} registros
-          </p>
-        </div>
-      </div>
+      <AdminPageHeading
+        eyebrow="Operación"
+        title={title}
+        description={formatRecordCount(filtered.length, records.length, hasFilters)}
+      />
       <div className={styles.workToolbar}>
         <label>
           <Search size={17} aria-hidden="true" />
           <span className={styles.srOnly}>Buscar</span>
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => updateSearch({ q: event.target.value })}
             placeholder="Buscar cliente o teléfono"
           />
         </label>
@@ -112,15 +139,18 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
       </div>
       {(estado !== "todos" || sedeId !== "todas") && (
         <div className={styles.activeFilters}>
-          <span>{estado !== "todos" ? estado : "Todos los estados"}</span>
+          <span>
+            {estado !== "todos"
+              ? getAdminStatusMeta(kind, estado as never).label
+              : "Todos los estados"}
+          </span>
           <span>
             {sedeId !== "todas" ? locationLabel(sedeId) : "Todas las sedes"}
           </span>
           <button
             type="button"
             onClick={() => {
-              setEstado("todos");
-              setSedeId("todas");
+              updateSearch({ estado: "todos", sede: "todas" });
             }}
           >
             <X size={14} aria-hidden="true" />
@@ -149,17 +179,22 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
           message={error}
           onRetry={() => void refresh()}
         />
+      ) : records.length === 0 && !hasFilters ? (
+        <AdminDataState
+          kind="empty"
+          title={`Todavía no hay ${title.toLowerCase()}`}
+          message={`Los ${title.toLowerCase()} nuevos aparecerán aquí.`}
+        />
       ) : filtered.length === 0 ? (
         <AdminDataState
           kind="empty"
           title="No hay resultados con estos filtros"
           message="Limpia los filtros o prueba otra búsqueda."
           onRetry={() => {
-            setQuery("");
-            setEstado("todos");
-            setSedeId("todas");
+            setSearchParams(new URLSearchParams(), { replace: true });
           }}
           actionLabel="Limpiar filtros"
+          actionIcon={X}
         />
       ) : (
         <>
@@ -177,7 +212,7 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
                   <strong>{entity.nombre}</strong>
                   <small>
                     {contextLabel(entity)} · {locationLabel(entity.sedeId)} ·{" "}
-                    {entity.fecha}
+                    {formatAdminDate(entity.fecha)}
                   </small>
                   {statusBadge(entity)}
                 </span>
@@ -211,8 +246,9 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
                     <td>
                       {locationLabel(entity.sedeId)}
                       <small>
-                        {entity.fecha}
-                        {kind === "cita" ? ` · ${(entity as Cita).hora}` : ""}
+                        {kind === "cita"
+                          ? formatAdminDate(entity.fecha, (entity as Cita).hora)
+                          : formatAdminDate(entity.fecha)}
                       </small>
                     </td>
                     <td>{statusBadge(entity)}</td>
@@ -234,8 +270,7 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
                 className={styles.filterClear}
                 type="button"
                 onClick={() => {
-                  setEstado("todos");
-                  setSedeId("todas");
+                  updateSearch({ estado: "todos", sede: "todas" });
                 }}
               >
                 Limpiar
@@ -255,13 +290,13 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
               Estado
               <select
                 value={estado}
-                onChange={(event) => setEstado(event.target.value)}
+                onChange={(event) => updateSearch({ estado: event.target.value })}
               >
                 <option value="todos">Todos</option>
                 {(ADMIN_STATUS_OPTIONS[kind] as readonly string[]).map(
                   (option) => (
                     <option value={option} key={option}>
-                      {option}
+                      {getAdminStatusMeta(kind, option as never).label}
                     </option>
                   ),
                 )}
@@ -271,7 +306,7 @@ export function AdminWorkPage({ kind }: AdminWorkPageProps) {
               Sede
               <select
                 value={sedeId}
-                onChange={(event) => setSedeId(event.target.value)}
+                onChange={(event) => updateSearch({ sede: event.target.value })}
               >
                 <option value="todas">Todas</option>
                 {operations.sedes.map((sede) => (

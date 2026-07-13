@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Favicon: misma identidad blanca del storefront público, esquinas redondeadas para pestañas. -->
+  <rect width="1024" height="1024" rx="200" fill="#ffffff" />
+  <circle cx="512" cy="512" r="247" fill="#54bfe8" stroke="#002d63" stroke-width="66" />
+  <circle cx="512" cy="512" r="82" fill="#ffffff" />
+</svg>

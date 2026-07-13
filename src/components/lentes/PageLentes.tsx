@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useCategorias } from "../../hooks/useCategorias";
 import { useConfiguracionCotizacion } from "../../hooks/useConfiguracionCotizacion";
+import { useOnline } from "../../hooks/useOnline";
 import { useProductos } from "../../hooks/useProductos";
 import { useSedes } from "../../hooks/useSedes";
 import { cotizacionesApi } from "../../lib/api/cotizaciones";
@@ -27,6 +28,7 @@ export function PageLentes() {
   const { categorias, loading: categoriasLoading } = useCategorias();
   const { sedes } = useSedes();
   const { configuracion, loading: configLoading, error: configError } = useConfiguracionCotizacion();
+  const online = useOnline();
   const monturasCategoriaId = categorias.find((category) => category.key === "monturas")?.id;
   const monturas = productos.filter((product) => product.categoriaId === monturasCategoriaId);
   const [montura, setMontura] = useState("");
@@ -67,6 +69,10 @@ export function PageLentes() {
   }
 
   async function registerQuote() {
+    if (!online) {
+      setError("Necesitas conexión a internet para registrar la cotización.");
+      return;
+    }
     if (!nombre.trim() || !telefono.trim() || !selectedFrame) {
       setError("Completa nombre, teléfono y montura para continuar.");
       return;
@@ -134,6 +140,7 @@ export function PageLentes() {
           <div className={styles.quoteLayout}>
             <div className={styles.summary}><h3>Resumen</h3><dl><div><dt>Montura</dt><dd>{selectedFrame?.nombre}</dd></div><div><dt>OD</dt><dd>{od || "Sin corrección"}</dd></div><div><dt>OI</dt><dd>{oi || "Sin corrección"}</dd></div><div><dt>Extras</dt><dd>{extras.length ? extras.map((key) => extrasDisponibles.find((extra) => extra.key === key)?.label).join(", ") : "Ninguno"}</dd></div></dl><div className={styles.total}><span>Montura ${selectedFrame?.precio} + lente base ${lenteBase} + extras ${extrasTotal}</span><strong>${total}</strong><small>Total estimado</small></div></div>
             <div className={styles.formSide}>
+              {!online && !confirmacion && <p className={form.error} role="alert">Sin conexión: necesitas internet para registrar la cotización.</p>}
               {error && <p className={form.error} role="alert">{error}</p>}
               {confirmacion ? <div className={styles.confirmation}><CheckCircle2 aria-hidden="true" /><div><h3>Cotización registrada</h3><p>{confirmacion}</p></div></div> : <>
                 <p className={form.notice}>Pedimos nombre y teléfono para registrar la cotización antes de abrir WhatsApp.</p>
@@ -141,7 +148,7 @@ export function PageLentes() {
                 <div className={form.field}><label htmlFor="quote-phone">Teléfono</label><input id="quote-phone" value={telefono} onChange={(event) => setTelefono(event.target.value)} autoComplete="tel" inputMode="tel" placeholder="Número de contacto" /></div>
                 <div className={form.field}><label htmlFor="quote-location">Sede de entrega</label><select id="quote-location" value={sede} onChange={(event) => setSede(event.target.value)}><option value="">Selecciona una sede</option>{sedes.map((item) => <option key={item.id} value={item.ciudad}>{item.ciudad}</option>)}</select></div>
                 <OptionalGooglePrefill onName={setNombre} />
-                <button className={styles.registerButton} type="button" onClick={registerQuote} disabled={enviando}>{enviando ? "Registrando..." : <>Registrar cotización <ChevronRight size={17} /></>}</button>
+                <button className={styles.registerButton} type="button" onClick={registerQuote} disabled={enviando || !online}>{enviando ? "Registrando..." : <>Registrar cotización <ChevronRight size={17} /></>}</button>
               </>}
             </div>
           </div>

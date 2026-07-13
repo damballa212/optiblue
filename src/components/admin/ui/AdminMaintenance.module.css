@@ -99,7 +99,10 @@
   outline: 0;
   background: transparent;
   color: #152338;
+  /* 16px explícito (no font: inherit): por debajo de eso iOS hace zoom
+     automático al enfocar el input y se queda pegado al cerrar el teclado. */
   font: inherit;
+  font-size: 16px;
 }
 .pageError,
 .formError {
@@ -356,7 +359,9 @@
   background: #fff;
   color: #172438;
   font: inherit;
-  font-size: 14px;
+  /* 16px mínimo: por debajo de esto iOS hace zoom automático al enfocar
+     el input y se queda pegado al cerrar el teclado. */
+  font-size: 16px;
   outline: 0;
 }
 .field textarea {

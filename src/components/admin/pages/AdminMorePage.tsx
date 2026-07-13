@@ -8,23 +8,23 @@ import {
 import { signOut } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../../../lib/auth/firebaseAuth";
+import { PushSettings } from "../notifications/PushSettings";
+import { AdminPageHeading } from "../ui/AdminPageHeading";
+import { deactivateAdminPush } from "../../../lib/push/deviceToken";
+import { openStorefront } from "../../../lib/appUrls";
 import styles from "../ui/AdminLayout.module.css";
 
 export function AdminMorePage() {
   const navigate = useNavigate();
   async function logout() {
+    await deactivateAdminPush();
     await signOut(auth);
     navigate("/admin/login");
   }
   return (
     <div className={styles.page}>
-      <div className={styles.pageTitle}>
-        <div>
-          <span>Configuración</span>
-          <h2>Más</h2>
-          <p>Mantenimiento y acceso</p>
-        </div>
-      </div>
+      <AdminPageHeading eyebrow="Configuración" title="Más" description="Mantenimiento y acceso" />
+      <PushSettings />
       <div className={styles.moreGroup}>
         <h3>Operación</h3>
         <Link to="/admin/catalogo">
@@ -48,7 +48,7 @@ export function AdminMorePage() {
         <h3>Acceso</h3>
         <button
           type="button"
-          onClick={() => window.open("/", "_blank", "noopener,noreferrer")}
+          onClick={openStorefront}
         >
           <ExternalLink aria-hidden="true" />
           <span>

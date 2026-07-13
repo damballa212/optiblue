@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useOnline } from "../../hooks/useOnline";
 import { useSedes } from "../../hooks/useSedes";
 import { pedidosApi } from "../../lib/api/pedidos";
 import { buildWAMessage, getSedeWhatsapp, openWA } from "../../lib/whatsapp";
@@ -17,6 +18,7 @@ interface ReservaModalProps {
 
 export function ReservaModal({ producto, onClose }: ReservaModalProps) {
   const { sedes } = useSedes();
+  const online = useOnline();
   const [sede, setSede] = useState("");
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -29,6 +31,10 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
   }, [sede, sedes]);
 
   async function confirmar() {
+    if (!online) {
+      setError("Necesitas conexión a internet para registrar tu solicitud.");
+      return;
+    }
     if (!nombre.trim() || !telefono.trim()) {
       setError("Completa tu nombre y teléfono para continuar.");
       return;
@@ -54,11 +60,12 @@ export function ReservaModal({ producto, onClose }: ReservaModalProps) {
   }
 
   return (
-    <ModalSurface title="Apartar en sede" eyebrow={producto.nombre} onClose={onClose} footer={confirmacion ? <button className={form.primary} type="button" onClick={onClose}>Cerrar</button> : <><button className={form.secondary} type="button" onClick={onClose} disabled={enviando}>Cancelar</button><button className={form.primary} type="button" onClick={confirmar} disabled={enviando}>{enviando ? "Registrando..." : <>Registrar solicitud <ArrowRight size={16} /></>}</button></>}>
+    <ModalSurface title="Apartar en sede" eyebrow={producto.nombre} onClose={onClose} footer={confirmacion ? <button className={form.primary} type="button" onClick={onClose}>Cerrar</button> : <><button className={form.secondary} type="button" onClick={onClose} disabled={enviando}>Cancelar</button><button className={form.primary} type="button" onClick={confirmar} disabled={enviando || !online}>{enviando ? "Registrando..." : <>Registrar solicitud <ArrowRight size={16} /></>}</button></>}>
       <div className={styles.product}>
         <div className={styles.media}><ProductImage src={producto.imagenUrl} alt={producto.nombre} width={600} height={360} /></div>
         <div><span>Producto</span><h3>{producto.nombre}</h3><strong>${producto.precio}</strong></div>
       </div>
+      {!online && !confirmacion && <p className={form.error} role="alert">Sin conexión: necesitas internet para registrar tu solicitud.</p>}
       {error && <p className={form.error} role="alert">{error}</p>}
       {confirmacion ? <div className={styles.confirmation}><CheckCircle2 aria-hidden="true" /><div><h3>Solicitud registrada</h3><p>{confirmacion}</p></div></div> : <>
         <p className={form.notice}>Pedimos estos datos para registrar tu solicitud antes de continuar por WhatsApp.</p>

@@ -25,6 +25,7 @@ import layout from "../ui/AdminLayout.module.css";
 import ui from "../ui/AdminUi.module.css";
 import styles from "../ui/AdminMaintenance.module.css";
 import polish from "../ui/AdminPolish.module.css";
+import { AdminPageHeading } from "../ui/AdminPageHeading";
 
 const EMPTY_PRODUCT: ProductFormValue = {
   nombre: "",
@@ -137,13 +138,12 @@ export function AdminCatalogPage() {
 
   return (
     <div className={layout.page}>
-      <div className={`${layout.pageTitle} ${polish.maintenanceTitle}`}>
-        <div>
-          <span>Mantenimiento</span>
-          <h2>Catálogo</h2>
-          <p>Productos y categorías visibles en el sitio público</p>
-        </div>
-        <button
+      <AdminPageHeading
+        className={polish.maintenanceTitle}
+        eyebrow="Mantenimiento"
+        title="Catálogo"
+        description="Productos y categorías visibles en el sitio público"
+        action={<button
           className={styles.primaryAction}
           type="button"
           onClick={() =>
@@ -154,8 +154,8 @@ export function AdminCatalogPage() {
         >
           <Plus aria-hidden="true" />
           {tab === "products" ? "Nuevo producto" : "Nueva categoría"}
-        </button>
-      </div>
+        </button>}
+      />
 
       <div
         className={styles.segmented}

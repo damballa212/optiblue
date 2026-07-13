@@ -14,6 +14,11 @@ const firebaseConfig = {
   // auth/auth-domain-config-required. No hace falta contra el emulador
   // (por eso nunca se notó hasta probar Google Sign-In en producción).
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? `${projectId}.firebaseapp.com`,
+  // Requeridos por Firebase Cloud Messaging (getToken/getMessaging) — sin
+  // esto el SDK de push del panel admin no puede registrarse. No afectan a
+  // Firestore/Auth, así que el fallback demo no rompe nada fuera de push.
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? "0",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID ?? "demo-app-id",
 };
 
 export const firebaseApp = initializeApp(firebaseConfig);

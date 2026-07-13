@@ -2,7 +2,7 @@
 
 Storefront público y panel administrativo de OptiBlue. Consulta de catálogo y sedes, cotización de lentes con fórmula óptica, reservas y citas, y gestión operativa desde un panel mobile-first protegido.
 
-**Producción**: [optiblue-prod.web.app](https://optiblue-prod.web.app) · **Backend**: [`optiblue-backend`](https://github.com/damballa212/optiblue-backend)
+**Storefront**: [optiblue-prod.web.app](https://optiblue-prod.web.app) · **Panel**: [optiblue-panel.web.app](https://optiblue-panel.web.app) · **Backend**: [`optiblue-backend`](https://github.com/damballa212/optiblue-backend)
 
 ## Contenido
 
@@ -39,6 +39,7 @@ Por defecto apunta al proyecto local `demo-optiblue` y espera:
 - Vite 8
 - React Router 7
 - Firebase 12: Firestore, Authentication, Functions y Hosting
+- Vite PWA + Workbox: dos PWA instalables y push FCM exclusivo del panel
 
 **Requisitos**: Node.js `^20.19.0` o `>=22.12.0` (engine de Vite 8), npm.
 
@@ -50,7 +51,9 @@ Por defecto apunta al proyecto local `demo-optiblue` y espera:
 - El total de una cotización lo calcula siempre el backend (producto real + configuración de precios administrable) — el frontend nunca lo decide ni lo envía. Ver `optiblue-backend/README.md`, sección "Integridad de precios".
 - Las escrituras administrativas pasan por Cloud Functions y requieren Firebase Auth con custom claim `admin: true`.
 - El panel admin es una "bandeja de trabajo operativa" mobile-first: `Hoy` (pendientes accionables), bottom nav en mobile / sidebar en desktop, cambio de estado con confirmación y **deshacer**, WhatsApp con mensaje editable, y mantenimiento de catálogo/sedes con validación y confirmación contextual de borrado (sin `window.confirm`/`alert`).
-- El panel y Firebase Auth se cargan bajo demanda; las páginas públicas también están separadas por ruta (code splitting).
+- Storefront y panel son builds/orígenes separados. Cada build contiene únicamente sus rutas y su service worker; Firebase Messaging solo existe en el panel.
+- El panel puede instalarse como PWA y recibir avisos de pedidos, citas y cotizaciones. El aviso foreground refresca la colección afectada; el background usa un único display administrado por FCM.
+- El navbar mobile del panel está anclado al viewport, mantiene Catálogo/Sedes bajo `Más` y conserva búsqueda/filtros operativos por URL durante la sesión.
 - El storefront público usa el sistema visual OptiBlue aprobado: Space Grotesk + DM Sans, navy/azul pastel/celeste, iconografía Lucide y fallbacks ópticos sin emojis.
 - Reserva, cotización y solicitud de cita permiten continuar con nombre y teléfono; Google es solo un atajo opcional de autocompletado.
 - Los datos reales de catálogo y sedes siguen incompletos. No se deben reemplazar con información inventada.
@@ -63,11 +66,16 @@ Producción requiere configurar estas variables sin guardar credenciales en Git:
 VITE_FIREBASE_PROJECT_ID
 VITE_FIREBASE_API_KEY
 VITE_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID
+VITE_FIREBASE_VAPID_KEY
 VITE_FUNCTIONS_BASE_URL
 VITE_SEDES_FUNCTIONS_BASE_URL
 VITE_PEDIDOS_FUNCTIONS_BASE_URL
 VITE_CITAS_FUNCTIONS_BASE_URL
 VITE_COTIZACIONES_FUNCTIONS_BASE_URL
+VITE_NOTIFICACIONES_FUNCTIONS_BASE_URL
+VITE_STOREFRONT_URL
 ```
 
 Sin `.env.production`, cada cliente de API cae a la URL del emulador local — por eso el desarrollo no requiere configurar nada de esto.
@@ -75,14 +83,20 @@ Sin `.env.production`, cada cliente de API cae a la URL del emulador local — p
 ## Comandos
 
 ```bash
-npm run dev        # servidor de desarrollo
-npm run build      # type-check (tsc -b) + build de producción
-npm test           # pruebas unitarias (12 archivos, 38 tests)
-npm run lint       # oxlint
-npm run preview    # previsualizar dist/
+npm run dev                 # storefront local (puerto 5173)
+npm run dev:panel           # panel local (puerto 5174)
+npm run build:storefront    # type-check + dist-storefront
+npm run build:panel         # type-check + dist-panel + smoke del chunk admin
+npm run build:all           # ambos builds
+npm test                    # pruebas unitarias/componentes (20 archivos, 68 tests)
+npm run lint                # oxlint
+npm run preview:storefront  # previsualizar dist-storefront
+npm run preview:panel       # previsualizar dist-panel
 ```
 
 `npm run lint` usa **oxlint** (Oxc/Rust), no ESLint. Este proyecto usa **TypeScript 7** (compilador nativo en Go), y `typescript-eslint` — incluido su último alpha — no lo soporta todavía: falla al importarse contra el compilador. `oxlint` no depende de `typescript-eslint` ni de `typescript` para nada, así que no choca. El chequeo de tipos real lo cubre `tsc -b` en `npm run build`.
+
+`build:panel` importa el chunk administrativo compilado mediante `scripts/smoke-panel-build.mjs`. Este gate detecta errores de evaluación que el compilador no ve. No se debe volver a forzar Firebase a un vendor group dividido por tamaño: Rolldown generó un ciclo entre `@firebase/app` y `@firebase/logger` que dejaba el panel en blanco aunque el build terminara correctamente.
 
 La validación visual del storefront y del panel admin se hace con Firebase Emulator + Playwright en `390`, `768` y `1440 px` — sesiones puntuales, no hay una suite de Playwright versionada en el repo todavía.
 
@@ -90,6 +104,7 @@ La validación visual del storefront y del panel admin se hace con Firebase Emul
 
 ```text
 src/
+├── apps/                  Entry points aislados de storefront y panel
 ├── components/
 │   ├── admin/           Panel administrativo (bandeja operativa, ver detalle abajo)
 │   ├── catalogo/         Catálogo, filtros, detalle de producto
@@ -99,6 +114,10 @@ src/
 ├── hooks/                 Suscripciones de lectura a Firestore + hooks de datos vía Function
 ├── lib/api/               Clientes de Cloud Functions (uno por módulo backend)
 ├── lib/auth/              Firebase Auth y autorización administrativa
+├── lib/push/, lib/pwa/    FCM, ciclo del token, instalación y actualización PWA
+├── sw/                    App-shell Workbox compartido por ambos service workers
+├── sw.storefront.ts       Service worker público sin Messaging
+├── sw.panel.ts            Service worker del panel con FCM
 ├── lib/firestore.ts       Instancia pública de Firestore
 ├── styles/                 Tokens y estilos compartidos del storefront
 └── types/                  Contratos TypeScript del modelo V1 (espejo de los schemas Zod del backend)
@@ -116,16 +135,17 @@ admin/
 └── ui/                     Detalle responsive, editor de estado con deshacer, composer de WhatsApp, confirmación de borrado, estados loading/error/empty
 ```
 
-El storefront no importa Firebase Auth de forma estática. `apiRequest` solo carga Auth cuando una operación administrativa lo solicita explícitamente.
+`vite.config.ts` resuelve `#app-target` a un entry point distinto según `VITE_APP_TARGET`. Esto evita que el storefront empaquete `AdminRoutes` y que el panel empaquete las páginas públicas.
 
 ## Producción
 
-Firebase Hosting sirve `dist/` y reescribe las rutas SPA hacia `index.html`. El proyecto configurado en `.firebaserc` es `optiblue-prod`.
+Firebase Hosting usa dos sites dentro de `optiblue-prod`: target `storefront` sirve `dist-storefront/` y target `panel` sirve `dist-panel/`. Ambos reescriben sus rutas SPA a su propio `index.html`; HTML, manifest y SW usan `no-cache`, mientras los assets hasheados son `immutable`.
 
 ```bash
-npm run build
-npm run preview   # verificar antes de desplegar
-firebase deploy --only hosting --project optiblue-prod
+npm run build:all
+npm run preview:storefront
+npm run preview:panel
+firebase deploy --only hosting:storefront,hosting:panel --project optiblue-prod
 ```
 
 El deploy no es automático ni forma parte de `npm run build` — es un paso manual. Si un cambio depende de un endpoint nuevo del backend, desplegar el backend primero (ver `optiblue-backend/README.md`, sección "Deploy a producción").

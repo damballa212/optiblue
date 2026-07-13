@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useOnline } from "../../hooks/useOnline";
 import { useSedes } from "../../hooks/useSedes";
 import { citasApi } from "../../lib/api/citas";
 import { ModalSurface } from "./ModalSurface";
@@ -23,6 +24,7 @@ interface AgendarCitaModalProps {
 
 export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaModalProps) {
   const { sedes } = useSedes();
+  const online = useOnline();
   const [sede, setSede] = useState("");
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -37,6 +39,10 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
   }, [sede, sedes]);
 
   async function confirmar() {
+    if (!online) {
+      setError("Necesitas conexión a internet para registrar la solicitud.");
+      return;
+    }
     if (!nombre.trim() || !telefono.trim() || !fecha || !hora) {
       setError("Completa nombre, teléfono, fecha y hora preferidas.");
       return;
@@ -60,7 +66,8 @@ export function AgendarCitaModal({ motivo, onClose, onAgendada }: AgendarCitaMod
   }
 
   return (
-    <ModalSurface title="Solicitar cita" eyebrow={motivo} onClose={onClose} footer={confirmacion ? <button className={form.primary} type="button" onClick={onClose}>Cerrar</button> : <><button className={form.secondary} type="button" onClick={onClose} disabled={enviando}>Cancelar</button><button className={form.primary} type="button" onClick={confirmar} disabled={enviando}>{enviando ? "Registrando..." : <>Registrar solicitud <ArrowRight size={16} /></>}</button></>}>
+    <ModalSurface title="Solicitar cita" eyebrow={motivo} onClose={onClose} footer={confirmacion ? <button className={form.primary} type="button" onClick={onClose}>Cerrar</button> : <><button className={form.secondary} type="button" onClick={onClose} disabled={enviando}>Cancelar</button><button className={form.primary} type="button" onClick={confirmar} disabled={enviando || !online}>{enviando ? "Registrando..." : <>Registrar solicitud <ArrowRight size={16} /></>}</button></>}>
+      {!online && !confirmacion && <p className={form.error} role="alert">Sin conexión: necesitas internet para registrar la solicitud.</p>}
       {error && <p className={form.error} role="alert">{error}</p>}
       {confirmacion ? <div className={styles.confirmation}><CheckCircle2 aria-hidden="true" /><div><h3>Solicitud registrada</h3><p>{confirmacion}</p></div></div> : <>
         <p className={form.notice}>La fecha y hora son preferidas, no un turno confirmado. La sede coordina disponibilidad después del registro.</p>

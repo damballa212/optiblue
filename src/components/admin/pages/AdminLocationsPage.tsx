@@ -20,6 +20,7 @@ import layout from "../ui/AdminLayout.module.css";
 import ui from "../ui/AdminUi.module.css";
 import styles from "../ui/AdminMaintenance.module.css";
 import polish from "../ui/AdminPolish.module.css";
+import { AdminPageHeading } from "../ui/AdminPageHeading";
 
 const EMPTY_LOCATION: LocationFormValue = {
   ciudad: "",
@@ -56,21 +57,20 @@ export function AdminLocationsPage() {
 
   return (
     <div className={layout.page}>
-      <div className={`${layout.pageTitle} ${polish.maintenanceTitle}`}>
-        <div>
-          <span>Mantenimiento</span>
-          <h2>Sedes</h2>
-          <p>Dirección, contacto, horario y mapa publicados</p>
-        </div>
-        <button
+      <AdminPageHeading
+        className={polish.maintenanceTitle}
+        eyebrow="Mantenimiento"
+        title="Sedes"
+        description="Dirección, contacto, horario y mapa publicados"
+        action={<button
           className={styles.primaryAction}
           type="button"
           onClick={() => setEditor({ mode: "new" })}
         >
           <Plus aria-hidden="true" />
           Nueva sede
-        </button>
-      </div>
+        </button>}
+      />
       {mutationError && (
         <p className={styles.pageError} role="alert">
           {mutationError}
@@ -93,6 +93,7 @@ export function AdminLocationsPage() {
           message="Crea la primera sede para publicar sus datos de contacto."
           onRetry={() => setEditor({ mode: "new" })}
           actionLabel="Crear sede"
+          actionIcon={Plus}
         />
       )}
       {!loading.sedes && !errors.sedes && sedes.length > 0 && (

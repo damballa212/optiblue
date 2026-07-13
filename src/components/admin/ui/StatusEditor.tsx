@@ -11,6 +11,7 @@ import { ADMIN_STATUS_OPTIONS, getAdminStatusMeta } from "../domain/status";
 import styles from "./AdminLayout.module.css";
 import ui from "./AdminUi.module.css";
 import polish from "./AdminPolish.module.css";
+import { formatAdminEntityKind } from "../domain/presentation";
 
 type StatusEntity = Pedido | Cita | Cotizacion;
 
@@ -89,7 +90,7 @@ export function StatusEditor({
   return (
     <ModalSurface
       title="Cambiar estado"
-      eyebrow={kind}
+      eyebrow={formatAdminEntityKind(kind)}
       onClose={() => !saving && onClose()}
       footer={
         <>

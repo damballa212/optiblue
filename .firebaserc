@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "optiblue-prod"
-  }
+  },
+  "targets": {
+    "optiblue-prod": {
+      "hosting": {
+        "storefront": [
+          "optiblue-prod"
+        ],
+        "panel": [
+          "optiblue-panel"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

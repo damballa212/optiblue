@@ -58,7 +58,9 @@
   border: 1px solid #9fb1bc;
   border-radius: 3px;
   color: var(--ink);
-  font-size: 12px;
+  /* 16px mínimo: por debajo de esto iOS hace zoom automático al enfocar
+     el input y se queda pegado al cerrar el teclado. */
+  font-size: 16px;
 }
 
 .rangeTrack {

@@ -1,0 +1,22 @@
+.banner {
+  position: fixed;
+  z-index: 900;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
+  background: var(--brand-navy);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.banner svg {
+  flex-shrink: 0;
+  color: var(--brand-sky);
+}

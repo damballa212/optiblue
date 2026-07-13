@@ -6,3 +6,4 @@ export type { Cotizacion, EstadoCotizacion } from "./cotizacion";
 export type { ConfiguracionCotizacion, ExtraCotizacion } from "./cotizacion-config";
 export type { Servicio } from "./servicio";
 export type { Pedido, EstadoPedido } from "./pedido";
+export type { RegistrarTokenInput, DesregistrarTokenInput } from "./notificacion";

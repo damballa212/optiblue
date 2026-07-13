@@ -21,13 +21,21 @@ export function ResponsiveDetailSurface({
   const previousFocus = useRef<HTMLElement | null>(null);
   const titleId = useId();
 
+  // Ver el comentario equivalente en ModalSurface.tsx: si onClose fuera
+  // dependencia de este efecto, se re-ejecutaría en cada render (ej. cada
+  // tecla de un input dentro del panel) y `panelRef.current?.focus()` le
+  // robaría el foco al input activo, cerrando el teclado en iOS a mitad de
+  // tipeo.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     previousFocus.current = document.activeElement as HTMLElement | null;
     panelRef.current?.focus();
     const previousOverflow = document.body.style.overflow;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== "Tab" || !panelRef.current) return;
@@ -58,7 +66,7 @@ export function ResponsiveDetailSurface({
       document.body.style.overflow = previousOverflow;
       previousFocus.current?.focus();
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div

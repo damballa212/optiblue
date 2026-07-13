@@ -134,6 +134,9 @@
   border: 1px solid #aab8c6;
   border-radius: 5px;
   color: #172438;
+  /* 16px mínimo: por debajo de esto iOS hace zoom automático al enfocar
+     el campo y se queda pegado al cerrar el teclado. */
+  font-size: 16px;
   line-height: 1.55;
   resize: vertical;
 }

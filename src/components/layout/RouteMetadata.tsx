@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-const SITE_URL = "https://optiblue-prod.web.app";
+const SITE_URL = (import.meta.env.VITE_APP_URL ?? window.location.origin).replace(/\/$/, "");
 const DEFAULT_DESCRIPTION = "Catálogo, lentes adaptados, servicios visuales y sedes de OptiBlue en Venezuela.";
 
 const ROUTE_METADATA: Record<string, { title: string; description: string }> = {
@@ -37,7 +37,10 @@ export function RouteMetadata() {
 
   useEffect(() => {
     const isAdmin = pathname.startsWith("/admin");
-    const metadata = ROUTE_METADATA[pathname] ?? { title: "OptiBlue", description: DEFAULT_DESCRIPTION };
+    const metadata = ROUTE_METADATA[pathname] ?? {
+      title: "OptiBlue",
+      description: isAdmin ? "Panel administrativo de OptiBlue." : DEFAULT_DESCRIPTION,
+    };
     const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
     document.title = isAdmin ? "Administración | OptiBlue" : metadata.title;

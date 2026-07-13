@@ -1,0 +1,63 @@
+.toast {
+  position: fixed;
+  z-index: 1000;
+  top: calc(16px + env(safe-area-inset-top));
+  right: 16px;
+  left: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 380px;
+  margin-left: auto;
+  padding: 14px 16px;
+  border: 1px solid var(--brand-navy);
+  border-radius: 3px;
+  background: var(--brand-navy);
+  color: var(--white);
+  box-shadow: 0 12px 28px rgba(0, 45, 99, 0.28);
+}
+
+.toast svg:first-child {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--brand-sky);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.body strong {
+  display: block;
+  font-size: 14px;
+}
+
+.body p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--brand-sky);
+}
+
+.dismiss {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--white);
+}
+
+.open {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--brand-sky);
+  border-radius: 3px;
+  background: var(--brand-sky);
+  color: var(--brand-navy);
+  font-weight: 800;
+}

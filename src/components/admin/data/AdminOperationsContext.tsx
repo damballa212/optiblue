@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useCitas } from "../../../hooks/useCitas";
 import { useCotizaciones } from "../../../hooks/useCotizaciones";
 import { usePedidos } from "../../../hooks/usePedidos";
@@ -42,6 +42,19 @@ export function AdminOperationsProvider({ children }: { children: ReactNode }) {
   const cotizacionesState = useCotizaciones();
   const productosState = useProductos();
   const sedesState = useSedes();
+
+  useEffect(() => {
+    const refreshVisibleData = () => {
+      if (document.visibilityState !== "visible") return;
+      void Promise.all([
+        pedidosState.refetch(),
+        citasState.refetch(),
+        cotizacionesState.refetch(),
+      ]);
+    };
+    document.addEventListener("visibilitychange", refreshVisibleData);
+    return () => document.removeEventListener("visibilitychange", refreshVisibleData);
+  }, [pedidosState.refetch, citasState.refetch, cotizacionesState.refetch]);
 
   const value = useMemo<AdminOperationsValue>(
     () => ({

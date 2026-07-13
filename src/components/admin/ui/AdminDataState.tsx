@@ -1,4 +1,4 @@
-import { AlertCircle, Inbox, RotateCw } from "lucide-react";
+import { AlertCircle, Inbox, RotateCw, type LucideIcon } from "lucide-react";
 import styles from "./AdminLayout.module.css";
 
 interface AdminDataStateProps {
@@ -7,6 +7,7 @@ interface AdminDataStateProps {
   message: string;
   onRetry?: () => void;
   actionLabel?: string;
+  actionIcon?: LucideIcon;
 }
 
 export function AdminDataState({
@@ -15,6 +16,7 @@ export function AdminDataState({
   message,
   onRetry,
   actionLabel = "Reintentar",
+  actionIcon: ActionIcon = RotateCw,
 }: AdminDataStateProps) {
   if (kind === "loading") {
     return (
@@ -44,7 +46,7 @@ export function AdminDataState({
       </div>
       {onRetry && (
         <button type="button" onClick={onRetry}>
-          <RotateCw size={15} aria-hidden="true" />
+          <ActionIcon size={15} aria-hidden="true" />
           {actionLabel}
         </button>
       )}

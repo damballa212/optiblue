@@ -1,0 +1,52 @@
+.card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--white);
+  margin-bottom: 16px;
+}
+
+.card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--brand-navy);
+  font-family: "Space Grotesk Variable", sans-serif;
+  font-size: 16px;
+}
+
+.card h3 svg {
+  color: var(--brand-sky);
+}
+
+.card p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.error {
+  color: var(--danger);
+}
+
+.primary,
+.secondary {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+.primary {
+  border: 1px solid var(--brand-navy);
+  background: var(--brand-navy);
+  color: var(--white);
+}
+
+.secondary {
+  border: 1px solid var(--brand-navy);
+  background: var(--white);
+  color: var(--brand-navy);
+}

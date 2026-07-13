@@ -1,0 +1,75 @@
+.banner {
+  position: fixed;
+  z-index: 800;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--brand-navy-strong);
+  background: var(--brand-navy);
+  color: var(--white);
+}
+
+.banner svg {
+  flex-shrink: 0;
+  color: var(--brand-sky);
+}
+
+.banner p {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.inlineIcon {
+  display: inline-block;
+  vertical-align: -2px;
+  color: var(--brand-sky);
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.install {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--brand-sky);
+  border-radius: 3px;
+  background: var(--brand-sky);
+  color: var(--brand-navy);
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dismiss {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--white);
+}
+
+@media (max-width: 480px) {
+  .banner {
+    bottom: calc(62px + env(safe-area-inset-bottom));
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+  }
+
+  .banner p {
+    order: 1;
+    flex-basis: 100%;
+  }
+}
