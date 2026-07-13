@@ -10,7 +10,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../lib/auth/firebaseAuth";
 import { useAdminOperations } from "./data/AdminOperationsContext";
@@ -182,7 +182,7 @@ export function AdminShell() {
           {NAV_ITEMS.map(({ to, label, shortLabel, icon: Icon, count, tab }) => {
             const isCurrent = activeTab === tab;
             return (
-            <NavLink
+            <Link
               key={to}
               to={destinationFor({ to, label, shortLabel, icon: Icon, count, tab })}
               className={isCurrent ? styles.bottomActive : undefined}
@@ -193,7 +193,7 @@ export function AdminShell() {
                 <b className={polish.pendingCount}>{countFor(count)}</b>
               )}
               <span>{shortLabel ?? label}</span>
-            </NavLink>
+            </Link>
             );
           })}
         </nav>

@@ -88,7 +88,7 @@ npm run dev:panel           # panel local (puerto 5174)
 npm run build:storefront    # type-check + dist-storefront
 npm run build:panel         # type-check + dist-panel + smoke del chunk admin
 npm run build:all           # ambos builds
-npm test                    # pruebas unitarias/componentes (20 archivos, 68 tests)
+npm test                    # pruebas unitarias/componentes (21 archivos, 70 tests)
 npm run lint                # oxlint
 npm run preview:storefront  # previsualizar dist-storefront
 npm run preview:panel       # previsualizar dist-panel

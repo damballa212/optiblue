@@ -28,7 +28,7 @@ Completado en codigo, sin deploy:
 
 Verificacion automatica completada:
 
-- Frontend: 20 archivos, 68 tests; lint, `tsc -b`, ambos builds y `git diff --check` verdes.
+- Frontend: 21 archivos, 70 tests; lint, `tsc -b`, ambos builds y `git diff --check` verdes.
 - Backend: 8 archivos, 50 tests; build y `git diff --check` verdes.
 - Aislamiento comprobado: storefront sin `AdminRoutes` ni Firebase Messaging; panel sin paginas publicas.
 - Preview del panel cargado en Chromium a 390x844: login visible y cero errores de pagina/consola.
