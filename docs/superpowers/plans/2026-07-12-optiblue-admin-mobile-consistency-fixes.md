@@ -7,13 +7,13 @@ Repositorios auditados:
 - Frontend: `/Users/marlon/Documents/trae_projects/optiblue/optiblue-web`
 - Backend: `/Users/marlon/Documents/trae_projects/optiblue/optiblue-backend`
 
-Estado: implementacion local completada; validacion visual real, commit y deploy pendientes.
+Estado: implementado, commiteado, pusheado y desplegado; Safari/iPhone y entrega push real pendientes.
 
 Tracking relacionado: `MAR-120` cubre la consistencia UX del backoffice y `MAR-119` sigue en progreso para la verificacion end-to-end de PWA/push. Este documento no reemplaza Linear ni replica su estado; define el contexto tecnico y la secuencia de implementacion.
 
-## Resultado de implementacion local
+## Resultado de implementacion
 
-Completado en codigo, sin deploy:
+Completado en codigo y produccion:
 
 - Shell mobile con un unico scroll owner y navbar fijo fuera del flujo de las rutas.
 - App bar compacta y un unico `h1` por pagina operativa mediante `AdminPageHeading`.
@@ -32,15 +32,17 @@ Verificacion automatica completada:
 - Backend: 8 archivos, 50 tests; build y `git diff --check` verdes.
 - Aislamiento comprobado: storefront sin `AdminRoutes` ni Firebase Messaging; panel sin paginas publicas.
 - Preview del panel cargado en Chromium a 390x844: login visible y cero errores de pagina/consola.
+- Produccion verificada con login real en las siete rutas del panel a 390x844, 768x1024 y 1440x900: navbar estable, tab correcta, un `h1`, cero overflow y cero errores.
+- Storefront verificado en los tres anchos sin overflow ni errores.
+- Backend `4c72818`; frontend `6733f44` + fix `49efb05`, todos publicados en `dev` y desplegados en Firebase.
 - `npm audit --omit=dev`: cero vulnerabilidades.
 - `pnpm audit --prod`: dos rutas transitivas moderadas hacia `uuid < 11.1.1`; requiere issue separado y no se fuerza una resolucion sin validar compatibilidad.
 
 Gates que siguen abiertos:
 
 - Safari navegador y PWA standalone en iPhone real.
-- Matriz visual 390/768/1440, toolbar, teclado, orientacion y ausencia de overflow.
+- Toolbar, teclado y orientacion en Safari/iPhone real.
 - Flujo push real foreground/background/app cerrada y alta unica.
-- Commit, push, deploy y verificacion post-deploy.
 
 ## Objetivo V1
 
@@ -501,7 +503,7 @@ Acceptance criteria:
 - [x] Verificar que storefront no contenga `AdminRoutes`.
 - [x] Verificar que panel no contenga chunks de paginas publicas.
 - [x] Verificar que cada SW precachee solo sus assets.
-- [ ] Verificar headers no-cache/immutable despues del deploy.
+- [x] Verificar headers no-cache/immutable despues del deploy.
 
 Acceptance criteria:
 
@@ -523,11 +525,11 @@ Acceptance criteria:
 ### Fase 7 - Verificacion y entrega
 
 - [ ] Tests unitarios de route grouping, labels, empty states, formatters y refresh por push.
-- [ ] Tests de componentes para heading unico y estado activo de Mas.
-- [ ] E2E mobile browser para las cinco tabs.
+- [x] Tests de componentes para heading unico y estado activo de Mas.
+- [x] E2E mobile browser para las cinco tabs.
 - [ ] E2E standalone donde la automatizacion lo permita.
 - [ ] Verificacion manual obligatoria en iPhone real.
-- [ ] Verificacion 390, 768 y 1440 sin overflow horizontal.
+- [x] Verificacion 390, 768 y 1440 sin overflow horizontal.
 - [x] `tsc -b` verde.
 - [x] `npm run lint` verde.
 - [x] Suite frontend verde.
@@ -535,24 +537,24 @@ Acceptance criteria:
 - [x] `npm audit` revisado antes de commit; frontend limpio y backend con hallazgo transitive moderado documentado.
 - [x] `git diff --check` verde.
 - [x] Revisar que no existan secretos/credenciales en el diff.
-- [ ] Commit frontend y backend antes de desplegar.
-- [ ] Referenciar commits en Linear.
-- [ ] Desplegar backend antes que frontend si cambia el contrato push.
-- [ ] Desplegar ambos hostings.
-- [ ] Repetir matriz real post-deploy.
+- [x] Commit frontend y backend antes de desplegar.
+- [x] Referenciar commits en Linear.
+- [x] Desplegar backend antes que frontend si cambia el contrato push.
+- [x] Desplegar ambos hostings.
+- [x] Repetir matriz real post-deploy en Chromium; Safari/iPhone sigue como gate separado.
 - [ ] Cerrar `MAR-119` solo con entrega push y login explicitamente confirmados.
 
 ## Matriz de regresion obligatoria
 
 | Superficie | 390 px | 768 px | 1440 px | Safari browser | Standalone | Teclado |
 |---|---:|---:|---:|---:|---:|---:|
-| Hoy | [ ] | [ ] | [ ] | [ ] | [ ] | N/A |
-| Pedidos | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Citas | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Cotizaciones | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Mas | [ ] | [ ] | [ ] | [ ] | [ ] | N/A |
-| Catalogo | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Sedes | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Hoy | [x] | [x] | [x] | [ ] | [ ] | N/A |
+| Pedidos | [x] | [x] | [x] | [ ] | [ ] | [ ] |
+| Citas | [x] | [x] | [x] | [ ] | [ ] | [ ] |
+| Cotizaciones | [x] | [x] | [x] | [ ] | [ ] | [ ] |
+| Mas | [x] | [x] | [x] | [ ] | [ ] | N/A |
+| Catalogo | [x] | [x] | [x] | [ ] | [ ] | [ ] |
+| Sedes | [x] | [x] | [x] | [ ] | [ ] | [ ] |
 | Detalle | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | WhatsApp | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Cambiar estado | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
@@ -572,11 +574,11 @@ Para cada celda mobile se debe revisar:
 
 ### Unitarias
 
-- [ ] Agrupacion de `/admin/catalogo` y `/admin/sedes` bajo `Mas`.
-- [ ] Empty state sin datos y sin filtros.
-- [ ] Empty state con filtros activos.
-- [ ] Labels de `no_pagado`, `cotizacion` y estados restantes.
-- [ ] Formateo de fecha valida/invalida sin errores de zona horaria.
+- [x] Agrupacion de `/admin/catalogo` y `/admin/sedes` bajo `Mas`.
+- [x] Empty state sin datos y sin filtros.
+- [x] Empty state con filtros activos.
+- [x] Labels de `no_pagado`, `cotizacion` y estados restantes.
+- [x] Formateo de fecha valida/invalida sin errores de zona horaria.
 - [ ] Evento push refresca solo la coleccion correcta.
 - [ ] Logout aplica la politica de token aprobada.
 
@@ -631,4 +633,4 @@ No conviene mezclar la correccion del shell con cambios de push en un solo commi
 - [x] Empty/error/offline states describen el estado real.
 - [x] No aparecen enums, fechas o copies tecnicos sin formatear.
 - [x] No se agregaron features ni campos fuera de V1.
-- [ ] Produccion queda representada por commits remotos reproducibles en ambos repositorios.
+- [x] Produccion queda representada por commits remotos reproducibles en ambos repositorios.
