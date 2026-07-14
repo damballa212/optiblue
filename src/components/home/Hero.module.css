@@ -300,10 +300,12 @@
 
 .secondary {
   display: inline-flex;
+  min-height: 42px;
   align-items: center;
   gap: 8px;
-  padding: 10px 0;
+  padding: 10px;
   border-bottom: 1px solid currentColor;
+  background: rgb(0 45 99 / calc(var(--p-open) * 0.82));
   color: color-mix(in srgb, var(--brand-navy) calc((1 - var(--p-open)) * 100%), var(--white));
   font-size: 14px;
   font-weight: 720;

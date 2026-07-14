@@ -31,7 +31,10 @@ beforeEach(() => {
   HTMLElement.prototype.scrollBy = vi.fn();
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe("Optical Portal Home", () => {
   it("mantiene el hero semántico y enlaza a los flujos productivos existentes", () => {
@@ -76,6 +79,18 @@ describe("Optical Portal Home", () => {
     fireEvent.keyDown(window, { key: "ArrowDown" });
 
     expect(story?.dataset.scene).toBe("01");
+  });
+
+  it("elimina el listener global de teclado al desmontarse", () => {
+    const addEventListener = vi.spyOn(window, "addEventListener");
+    const removeEventListener = vi.spyOn(window, "removeEventListener");
+    const { unmount } = render(<MemoryRouter><Hero /></MemoryRouter>);
+    const keydownRegistration = addEventListener.mock.calls.find(([eventName]) => eventName === "keydown");
+
+    expect(keydownRegistration).toBeTruthy();
+    unmount();
+
+    expect(removeEventListener).toHaveBeenCalledWith("keydown", keydownRegistration?.[1]);
   });
 
   it("expone cuatro accesos V1 sin inventar promociones", () => {
