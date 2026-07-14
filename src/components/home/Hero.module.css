@@ -19,6 +19,7 @@
   overflow: hidden;
   background: var(--brand-pastel);
   isolation: isolate;
+  touch-action: pan-x pinch-zoom;
 }
 
 .navyReveal,
@@ -379,7 +380,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .story { height: auto; }
-  .stage { position: relative; top: auto; height: calc(100svh - 72px); }
+  .stage { position: relative; top: auto; height: calc(100svh - 72px); touch-action: auto; }
   .navyReveal,
   .electricField,
   .opticGrid,
