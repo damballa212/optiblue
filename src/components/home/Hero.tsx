@@ -14,6 +14,8 @@ import styles from "./Hero.module.css";
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const phase = (progress: number, start: number, end: number) => clamp((progress - start) / (end - start));
 const SCENE_LABELS = ["01", "02", "03", "04"] as const;
+const HERO_TOUCH_ACTION = "pan-x pinch-zoom";
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 gsap.registerPlugin(Observer);
 
@@ -49,6 +51,9 @@ export function Hero() {
   const storyRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [scene, setScene] = useState<(typeof SCENE_LABELS)[number]>("01");
+  const initialTouchAction = typeof window.matchMedia === "function" && window.matchMedia(REDUCED_MOTION_QUERY).matches
+    ? "auto"
+    : HERO_TOUCH_ACTION;
 
   useEffect(() => {
     const story = storyRef.current;
@@ -56,7 +61,7 @@ export function Hero() {
     if (!story || !stage) return;
 
     const reducedMotion = typeof window.matchMedia === "function"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      ? window.matchMedia(REDUCED_MOTION_QUERY)
       : null;
     const controller = new HeroStepperController();
     const visualState = { progress: HERO_SCENE_TARGETS[0] };
@@ -131,6 +136,7 @@ export function Hero() {
       visualState.progress = HERO_SCENE_TARGETS[0];
       applyVisualProgress(stage, visualState.progress);
       setScene("01");
+      stage.style.touchAction = reducedMotion?.matches ? "auto" : HERO_TOUCH_ACTION;
 
       if (reducedMotion?.matches) return;
 
@@ -162,7 +168,7 @@ export function Hero() {
 
   return (
     <section ref={storyRef} className={styles.story} id="inicio" data-scene={scene}>
-      <div ref={stageRef} className={styles.stage}>
+      <div ref={stageRef} className={styles.stage} style={{ touchAction: initialTouchAction }}>
         <div className={styles.navyReveal} aria-hidden="true" />
         <div className={styles.electricField} aria-hidden="true" />
         <div className={styles.opticGrid} aria-hidden="true"><span /><span /><span /><span /></div>

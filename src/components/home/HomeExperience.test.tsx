@@ -37,6 +37,26 @@ afterEach(() => {
 });
 
 describe("Optical Portal Home", () => {
+  it("reserva el gesto vertical para el stepper sin bloquear paneo horizontal ni zoom", () => {
+    const { container } = render(<MemoryRouter><Hero /></MemoryRouter>);
+    const stage = container.querySelector<HTMLElement>("#inicio > div");
+
+    expect(stage?.style.touchAction).toBe("pan-x pinch-zoom");
+  });
+
+  it("restaura el scroll tactil nativo cuando reduced motion desactiva el stepper", () => {
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as MediaQueryList);
+
+    const { container } = render(<MemoryRouter><Hero /></MemoryRouter>);
+    const stage = container.querySelector<HTMLElement>("#inicio > div");
+
+    expect(stage?.style.touchAction).toBe("auto");
+  });
+
   it("mantiene el hero semántico y enlaza a los flujos productivos existentes", () => {
     render(<MemoryRouter><Hero /></MemoryRouter>);
 
