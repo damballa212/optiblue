@@ -1,6 +1,7 @@
 .story {
   position: relative;
-  height: 180svh;
+  height: calc(100svh - 72px);
+  min-height: 590px;
   background: var(--brand-pastel);
 }
 
@@ -13,7 +14,7 @@
   --p-exit: 0;
   position: sticky;
   top: 72px;
-  height: calc(100svh - 72px);
+  height: 100%;
   min-height: 590px;
   overflow: hidden;
   background: var(--brand-pastel);
@@ -327,8 +328,8 @@
 .counter i { width: 44px; height: 1px; background: currentColor; opacity: 0.5; }
 
 @media (max-width: 1023px) {
-  .story { height: 155svh; }
-  .stage { top: 62px; height: calc(100svh - 62px); min-height: 580px; }
+  .story { height: calc(100svh - 62px); min-height: 580px; }
+  .stage { top: 62px; min-height: 580px; }
   .copy { left: 28px; width: 58vw; }
   .copy h1 { font-size: 50px; }
   .portalRig { left: 84%; width: 340px; height: 340px; }
@@ -340,8 +341,8 @@
 }
 
 @media (max-width: 767px) {
-  .story { height: 140svh; }
-  .stage { height: calc(100svh - 124px - env(safe-area-inset-bottom)); min-height: 520px; }
+  .story { height: calc(100svh - 124px - env(safe-area-inset-bottom)); min-height: 520px; }
+  .stage { min-height: 520px; }
   .navyReveal { clip-path: circle(calc(7% + var(--p-open) * 125%) at 76% 72%); }
   .electricField { width: 31%; }
   .copy { top: 33px; left: 20px; width: calc(100% - 40px); transform: translateY(calc(var(--p-copy-out) * -46px)); }
