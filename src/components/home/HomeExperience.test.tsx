@@ -1,12 +1,15 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import type { Producto } from "../../types";
 import { CampaignRail } from "./CampaignRail";
 import { FeaturedSelection } from "./FeaturedSelection";
 import { Hero } from "./Hero";
+
+const heroStylesheet = readFileSync("src/components/home/Hero.module.css", "utf8");
 
 const product: Producto = {
   id: "classic-pro",
@@ -37,6 +40,16 @@ afterEach(() => {
 });
 
 describe("Optical Portal Home", () => {
+  it("reserva el gesto vertical para el stepper sin bloquear paneo horizontal ni zoom", () => {
+    expect(heroStylesheet).toMatch(/\.stage\s*\{[^}]*touch-action:\s*pan-x\s+pinch-zoom;/s);
+  });
+
+  it("restaura el scroll tactil nativo cuando reduced motion desactiva el stepper", () => {
+    expect(heroStylesheet).toMatch(
+      /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\.stage\s*\{[^}]*touch-action:\s*auto;/,
+    );
+  });
+
   it("mantiene el hero semántico y enlaza a los flujos productivos existentes", () => {
     render(<MemoryRouter><Hero /></MemoryRouter>);
 
